@@ -4,6 +4,8 @@
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- 阶段 3a 起测试 App 工程（WPF 纯逻辑类：HeadphoneHeroController / PanelPresentations） -->
+    <UseWPF>true</UseWPF>
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
@@ -18,10 +20,13 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <!-- UseWPF 引入 WindowsDesktop SDK 后隐式 using 集合不再含 System.IO，显式补回 -->
+    <Using Include="System.IO" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\QcyH3Tray.Core\QcyH3Tray.Core.csproj" />
+    <ProjectReference Include="..\..\src\QcyH3Tray.App\QcyH3Tray.App.csproj" />
   </ItemGroup>
 
 </Project>

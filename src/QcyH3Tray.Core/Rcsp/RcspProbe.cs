@@ -333,6 +333,72 @@ public static class RcspProbe
         return $"eqType=0x{data[0]:X2}，masterGain={masterGain}，剩余 {data.Length - 3}B 不足 7 段：{Hex(data)}";
     }
 
+    // ───────────────────────── 阶段 4a：扩展功能探针解读（纯函数） ─────────────────────────
+
+    /// <summary>
+    /// 阶段 4a 调研到的非 EQ CUSTOM 命令中文名（出处：Quicky docs/protocol.md 命令总表、
+    /// qcy-h3s-windows h3s_device.py 与 docs/PROTOCOLO-LEITURAS.md 的 APK ConstantCMDID 对照）。
+    /// </summary>
+    public static string CustomCmdName(byte cmd) => cmd switch
+    {
+        PowerManager.Cmd => "自动关机/电源管理(0x14)",
+        0x19 => "语音名称(0x19)",
+        0x1D => "提示音音量(0x1D)",
+        0x24 => "双设备连接(0x24, CMDID_1T2)",
+        0x2B => "按键功能旧通道(0x2B)",
+        0x3D => "播放提示音(0x3D, 写)",
+        _ => $"command 0x{cmd:X2}",
+    };
+
+    /// <summary>
+    /// 解读提示音音量读响应（<c>[0x1D][声明长度][volume][max?]</c>）。出处：Quicky
+    /// ParseToneVolume（第 1 字节音量、可选第 2 字节最大值，缺省 100）与 qcy-h3s 真机实测
+    /// <c>1d 02 06 08</c>（H3S 家族音量 0..8、第 4 字节为最大值）。null = 回声不符或无数据。
+    /// </summary>
+    public static string? DescribeToneVolume(byte[] p)
+    {
+        if (p.Length < 3 || p[0] != 0x1D || p[1] < 1)
+        {
+            return null;
+        }
+
+        int volume = p[2];
+        int max = p.Length >= 4 ? p[3] : 100;
+        return $"提示音音量 = {volume}（最大 {max}；Quicky 约定缺省 100，H3S 家族实测范围 0..8）";
+    }
+
+    /// <summary>
+    /// 解读语音名称读响应（<c>[0x19][声明长度][UTF-8/ASCII 字节 × N]</c>）。出处：Quicky
+    /// dispatch.go（rename/audio lang 按 NUL 结尾字符串解析）与 qcy-h3s 真机实测
+    /// <c>19 04 4a 4c 30 30</c> = "JL00"。null = 回声不符或无数据。
+    /// </summary>
+    public static string? DescribeVoiceName(byte[] p)
+    {
+        if (p.Length < 2 || p[0] != 0x19 || p[1] < 1)
+        {
+            return null;
+        }
+
+        int declared = Math.Min(p[1], p.Length - 2);
+        string text = System.Text.Encoding.UTF8.GetString(p, 2, declared).TrimEnd('\0');
+        return $"语音名称 = \"{text}\"（{declared}B UTF-8，NUL 截断）";
+    }
+
+    /// <summary>
+    /// 解读单字节开关类读响应（<c>[cmd][01][value]</c>，双设备连接 0x24 等）。
+    /// 出处：qcy-h3s 真机实测 <c>24 01 00</c>（CMDID_1T2）；value 的开/关极性参考仓库均未验证，
+    /// 只报原始字节不做断言。null = 回声不符或声明长度为 0。
+    /// </summary>
+    public static string? DescribeSwitchRead(byte cmd, byte[] p)
+    {
+        if (p.Length < 3 || p[0] != cmd || p[1] < 1)
+        {
+            return null;
+        }
+
+        return $"{CustomCmdName(cmd)} 值 = 0x{p[2]:X2}（声明 {p[1]}B；开/关极性参考仓库未验证，仅报原始值）";
+    }
+
     /// <summary>大写十六进制、空格分隔。</summary>
     private static string Hex(ReadOnlySpan<byte> data)
     {

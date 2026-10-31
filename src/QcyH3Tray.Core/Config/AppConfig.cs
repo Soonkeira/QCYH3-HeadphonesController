@@ -24,6 +24,34 @@ public sealed class AppConfig
     /// <summary>开机自启（阶段 3 托盘应用预留）。</summary>
     public bool AutoStart { get; set; }
 
+    // ───────────────────────── 阶段 3b：控制中心窗口（向后兼容默认值） ─────────────────────────
+
+    /// <summary>控制中心窗口宽度（DIP）。缺失/损坏时回退 760。</summary>
+    public double ControlCenterWidth { get; set; } = 760;
+
+    /// <summary>控制中心窗口高度（DIP）。缺失/损坏时回退 600。</summary>
+    public double ControlCenterHeight { get; set; } = 600;
+
+    /// <summary>控制中心窗口 X 坐标（DIP）；null = 未记录（居中显示）。</summary>
+    public double? ControlCenterLeft { get; set; }
+
+    /// <summary>控制中心窗口 Y 坐标（DIP）；null = 未记录（居中显示）。</summary>
+    public double? ControlCenterTop { get; set; }
+
+    /// <summary>首次连接耳机成功的时间（本地时间）；null = 从未连接成功。</summary>
+    public DateTimeOffset? FirstConnectedAt { get; set; }
+
+    // ───────────────────────── 阶段 6：桌面通知（向后兼容默认值） ─────────────────────────
+
+    /// <summary>桌面通知开关（托盘气泡，Win10+ 呈现为 toast；低电量提醒等）。缺失时回退 true。</summary>
+    public bool NotificationsEnabled { get; set; } = true;
+
+    /// <summary>
+    /// 低电量提醒阈值（%）。可选档位 10/15/20/30（默认 20）；
+    /// 非法值在消费端（<c>LowBatteryAdvisor.ClampThreshold</c>）回退默认，不在此处校验。
+    /// </summary>
+    public int LowBatteryThresholdPercent { get; set; } = 20;
+
     /// <summary>默认配置文件完整路径。</summary>
     public static string DefaultPath =>
         Path.Combine(

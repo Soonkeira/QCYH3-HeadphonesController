@@ -24,10 +24,12 @@ namespace QcyH3Tray.Cli;
 /// EQ 读变体 / 预设 ID 属性探针 / GATT 直读 / 全 ID 扫描，纯读无写，长期保留的实验通道）。</item>
 /// <item><c>eqprobe3 &lt;地址或名称&gt;</c>：EQ v1 读写验证（读基线 → 写全零平线 → 等 1s
 /// 读回对比 → 原样恢复基线 → 读回验证，打印四步对照表与结论；唯一写操作为全零平线与恢复）。</item>
+/// <item><c>probe-off / probe-keys / probe-tone / probe-multi &lt;地址或名称&gt;</c>：
+/// 阶段 4a 扩展功能探针（自动关机 / 按键映射 / 提示音 / 双设备连接，见 <see cref="Probes"/> 文件头）。</item>
 /// </list>
 /// 退出码：成功 0，失败 1，用法错误 2。所有失败路径输出可读中文错误。
 /// </summary>
-internal static class Program
+internal static partial class Program
 {
     private const int ExitOk = 0;
     private const int ExitError = 1;
@@ -75,6 +77,18 @@ internal static class Program
                 "eqprobe3" => args.Length >= 2
                     ? await CmdEqProbe3Async(args[1]).ConfigureAwait(false)
                     : UsageError("用法: QcyH3Tray.Cli eqprobe3 <地址或名称>"),
+                "probe-off" => args.Length >= 2
+                    ? await CmdProbeOffAsync(args[1]).ConfigureAwait(false)
+                    : UsageError("用法: QcyH3Tray.Cli probe-off <地址或名称>"),
+                "probe-keys" => args.Length >= 2
+                    ? await CmdProbeKeysAsync(args[1]).ConfigureAwait(false)
+                    : UsageError("用法: QcyH3Tray.Cli probe-keys <地址或名称>"),
+                "probe-tone" => args.Length >= 2
+                    ? await CmdProbeToneAsync(args[1]).ConfigureAwait(false)
+                    : UsageError("用法: QcyH3Tray.Cli probe-tone <地址或名称>"),
+                "probe-multi" => args.Length >= 2
+                    ? await CmdProbeMultiAsync(args[1]).ConfigureAwait(false)
+                    : UsageError("用法: QcyH3Tray.Cli probe-multi <地址或名称>"),
                 "help" => PrintUsage(),
                 _ => UsageError($"未知命令「{args.FirstOrDefault()}」。\n{UsageText()}"),
             };
@@ -1534,6 +1548,23 @@ internal static class Program
                                            全零平线（masterGain=0、增益全 0）→ 等 1s 读
                                            回对比 → 原样恢复基线 → 读回验证，打印四步
                                            对照表与结论（唯一写操作为全零平线与恢复）
+          QcyH3Tray.Cli probe-off <地址或名称>
+                                           自动关机读写验证：读 0x14 基线（时长+计时，
+                                           分钟）→ 当前值原样回写 → 回读对比（唯一写
+                                           操作为基线原样回写，不改任何设置）
+          QcyH3Tray.Cli probe-keys <地址或名称>
+                                           按键映射读写验证：GET_ADV_INFO type=02 读
+                                           键表（keyNum/action/function 三元组+语义名）
+                                           → 0x2B 旧通道对照 → SET_ADV_INFO 整表原样
+                                           回写 → 回读对比（不改任何映射）
+          QcyH3Tray.Cli probe-tone <地址或名称>
+                                           提示音只读探测：提示音音量（0x1D 读）、语音
+                                           名称（0x19 读）、播放命令回声探测；列出已调研
+                                           的写命令（3D 播放/4B 查找耳机）但不接线
+          QcyH3Tray.Cli probe-multi <地址或名称>
+                                           双设备连接只读探测：CMDID_1T2（0x24 读）+
+                                           GET_ADV_INFO 全掩码属性表；写命令无调研出处，
+                                           不实现
           QcyH3Tray.Cli help               显示本帮助
 
         地址格式: AA:BB:CC:DD:EE:FF（冒号/横线可省略，按十六进制解析）

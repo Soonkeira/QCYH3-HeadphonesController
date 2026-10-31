@@ -1,0 +1,329 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+      ══════════════════════════════════════════════════════════════════
+      产品视觉（阶段 5）：QCY H3 头戴式耳机 3/4 视角矢量渲染图（原创绘制）。
+      - 无外部图片：全部 Path / EllipseGeometry + 渐变画刷程序化绘制，
+        统一 512×512 设计坐标（DrawingImage 无画布概念，坐标即画布），
+        任意缩放保持清晰；透明底。
+      - 键：AppImage/HeadphoneHero（浅底版：深色机身 + 黑色柔和投影）
+            AppImage/HeadphoneHero.Dark（深底版：机身提亮为石墨灰 + 冷色弱光晕）。
+      - 结构：共享几何（本文件 Resources 区）+ 双版本画刷/钢笔；
+        两版 DrawingImage 引用同一批几何，仅换材质——保证双版本造型永远一致。
+      - 造型：35-40° 转角，远侧（左）耳罩略小略暗、近侧（右）大而亮；
+        头梁为双弧夹层（描边路径 + 顶部高光弧 + 内缘阴影弧 + 内衬垫弧）；
+        耳垫从耳罩内下缘露出一弯月牙（哑光深色 + 柔和边缘光）；
+        材质哑光（低对比渐变 + 微弱镜面高光），无描边卡通风。
+      - 再生成：本文件即源（矢量可编辑）；应用图标由 tools/IconGen 独立生成。
+      ══════════════════════════════════════════════════════════════════
+    -->
+
+    <!-- ═══════════ 共享画刷（两版通用的高光/白色系） ═══════════ -->
+
+    <!-- 耳罩机身的左上环境光镜面（低透明度，哑光质感的关键） -->
+    <RadialGradientBrush x:Key="Hero/Brush.Sheen.Body"
+                         Center="0.36,0.28" GradientOrigin="0.30,0.22"
+                         RadiusX="0.85" RadiusY="0.85">
+        <GradientStop Color="#26FFFFFF" Offset="0"/>
+        <GradientStop Color="#0FFFFFFF" Offset="0.45"/>
+        <GradientStop Color="#00FFFFFF" Offset="0.8"/>
+    </RadialGradientBrush>
+
+    <!-- 外盖的更亮一层镜面 -->
+    <RadialGradientBrush x:Key="Hero/Brush.Sheen.Cover"
+                         Center="0.38,0.30" GradientOrigin="0.32,0.24"
+                         RadiusX="0.80" RadiusY="0.80">
+        <GradientStop Color="#33FFFFFF" Offset="0"/>
+        <GradientStop Color="#12FFFFFF" Offset="0.5"/>
+        <GradientStop Color="#00FFFFFF" Offset="0.85"/>
+    </RadialGradientBrush>
+
+    <!-- ═══════════ 浅底版材质（深色机身 + 黑色柔和投影） ═══════════ -->
+
+    <!-- 远侧耳罩（左，略暗） -->
+    <LinearGradientBrush x:Key="Hero/Brush.Far.Body.Light" StartPoint="0.15,0" EndPoint="0.85,1">
+        <GradientStop Color="#34363C" Offset="0"/>
+        <GradientStop Color="#1E1F23" Offset="0.55"/>
+        <GradientStop Color="#17181B" Offset="1"/>
+    </LinearGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Far.Cover.Light"
+                         Center="0.40,0.35" RadiusX="0.75" RadiusY="0.75">
+        <GradientStop Color="#3B3D44" Offset="0"/>
+        <GradientStop Color="#242529" Offset="0.6"/>
+        <GradientStop Color="#17181A" Offset="1"/>
+    </RadialGradientBrush>
+
+    <!-- 近侧耳罩（右，大而亮） -->
+    <LinearGradientBrush x:Key="Hero/Brush.Near.Body.Light" StartPoint="0.12,0" EndPoint="0.9,1">
+        <GradientStop Color="#43454C" Offset="0"/>
+        <GradientStop Color="#26272B" Offset="0.55"/>
+        <GradientStop Color="#191A1D" Offset="1"/>
+    </LinearGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Near.Cover.Light"
+                         Center="0.40,0.32" RadiusX="0.78" RadiusY="0.78">
+        <GradientStop Color="#4B4D55" Offset="0"/>
+        <GradientStop Color="#2B2C31" Offset="0.6"/>
+        <GradientStop Color="#1B1C1F" Offset="1"/>
+    </RadialGradientBrush>
+
+    <!-- 头梁 / 耳垫 / 投影 -->
+    <LinearGradientBrush x:Key="Hero/Brush.Band.Light" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#3E4047" Offset="0"/>
+        <GradientStop Color="#2A2B30" Offset="0.55"/>
+        <GradientStop Color="#1B1C1F" Offset="1"/>
+    </LinearGradientBrush>
+    <!-- 耳垫：径向中心压向下方——露出的底缘月牙正落在较亮段（软胶受光面），
+         隐藏在上缘的部分落在暗段，月牙才可读 -->
+    <RadialGradientBrush x:Key="Hero/Brush.Cushion.Light"
+                         Center="0.5,0.62" GradientOrigin="0.5,0.62"
+                         RadiusX="0.75" RadiusY="0.75">
+        <GradientStop Color="#26272C" Offset="0"/>
+        <GradientStop Color="#131417" Offset="1"/>
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Shadow.Outer.Light">
+        <GradientStop Color="#2E000000" Offset="0"/>
+        <GradientStop Color="#14000000" Offset="0.75"/>
+        <GradientStop Color="#00000000" Offset="1"/>
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Shadow.Core.Light">
+        <GradientStop Color="#26000000" Offset="0"/>
+        <GradientStop Color="#00000000" Offset="1"/>
+    </RadialGradientBrush>
+
+    <!-- 浅底版钢笔（描边即细节） -->
+    <Pen x:Key="Hero/Pen.Cushion.Rim.Light" Thickness="2" Brush="#804E515A"/>
+    <Pen x:Key="Hero/Pen.Near.Ring1.Light" Thickness="2" Brush="#10FFFFFF"/>
+    <Pen x:Key="Hero/Pen.Band.TopLight.Light" Thickness="3" Brush="#52AEB3BD"/>
+    <Pen x:Key="Hero/Pen.Band.InnerShade.Light" Thickness="3" Brush="#4D000000"/>
+
+    <!-- ═══════════ 深底版材质（石墨灰提亮 + 冷色弱光晕） ═══════════ -->
+
+    <LinearGradientBrush x:Key="Hero/Brush.Far.Body.Dark" StartPoint="0.15,0" EndPoint="0.85,1">
+        <GradientStop Color="#4A4C55" Offset="0"/>
+        <GradientStop Color="#2A2B30" Offset="0.55"/>
+        <GradientStop Color="#202124" Offset="1"/>
+    </LinearGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Far.Cover.Dark"
+                         Center="0.40,0.35" RadiusX="0.75" RadiusY="0.75">
+        <GradientStop Color="#54565F" Offset="0"/>
+        <GradientStop Color="#33343A" Offset="0.6"/>
+        <GradientStop Color="#222327" Offset="1"/>
+    </RadialGradientBrush>
+
+    <LinearGradientBrush x:Key="Hero/Brush.Near.Body.Dark" StartPoint="0.12,0" EndPoint="0.9,1">
+        <GradientStop Color="#55575F" Offset="0"/>
+        <GradientStop Color="#313237" Offset="0.55"/>
+        <GradientStop Color="#232428" Offset="1"/>
+    </LinearGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Near.Cover.Dark"
+                         Center="0.40,0.32" RadiusX="0.78" RadiusY="0.78">
+        <GradientStop Color="#5F616B" Offset="0"/>
+        <GradientStop Color="#383A41" Offset="0.6"/>
+        <GradientStop Color="#26272B" Offset="1"/>
+    </RadialGradientBrush>
+
+    <LinearGradientBrush x:Key="Hero/Brush.Band.Dark" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#4A4C55" Offset="0"/>
+        <GradientStop Color="#34353B" Offset="0.55"/>
+        <GradientStop Color="#26272B" Offset="1"/>
+    </LinearGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Cushion.Dark"
+                         Center="0.5,0.62" GradientOrigin="0.5,0.62"
+                         RadiusX="0.75" RadiusY="0.75">
+        <GradientStop Color="#3A3C42" Offset="0"/>
+        <GradientStop Color="#1B1C20" Offset="1"/>
+    </RadialGradientBrush>
+    <!-- 深底版：投影弱化为耳机下方的冷色光晕（浅蓝辉光，弱透明度） -->
+    <RadialGradientBrush x:Key="Hero/Brush.Shadow.Outer.Dark">
+        <GradientStop Color="#2E5B8CFF" Offset="0"/>
+        <GradientStop Color="#145B8CFF" Offset="0.7"/>
+        <GradientStop Color="#005B8CFF" Offset="1"/>
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="Hero/Brush.Shadow.Core.Dark">
+        <GradientStop Color="#385B8CFF" Offset="0"/>
+        <GradientStop Color="#005B8CFF" Offset="1"/>
+    </RadialGradientBrush>
+
+    <Pen x:Key="Hero/Pen.Cushion.Rim.Dark" Thickness="2" Brush="#80606470"/>
+    <Pen x:Key="Hero/Pen.Near.Ring1.Dark" Thickness="2" Brush="#1CFFFFFF"/>
+    <Pen x:Key="Hero/Pen.Band.TopLight.Dark" Thickness="3" Brush="#66D2D6DE"/>
+    <Pen x:Key="Hero/Pen.Band.InnerShade.Dark" Thickness="3" Brush="#59000000"/>
+
+    <!-- ═══════════ 共享几何（双版本唯一造型来源） ═══════════ -->
+
+    <!-- 地面投影（浅底=黑影 / 深底=光晕，几何相同） -->
+    <EllipseGeometry x:Key="Hero/Geo.Shadow.Outer" Center="272,446" RadiusX="165" RadiusY="19"/>
+    <EllipseGeometry x:Key="Hero/Geo.Shadow.Core" Center="272,444" RadiusX="105" RadiusY="11"/>
+
+    <!-- 头梁：双弧夹层——主体描边路径 + 顶部高光弧（上移 3）+ 内缘阴影弧（下移 6）；
+         两端伸入耳罩顶部轮廓内被覆盖，呈"嵌入"效果。 -->
+    <PathGeometry x:Key="Hero/Geo.Band">
+        <PathFigure StartPoint="178,258">
+            <BezierSegment Point1="178,152" Point2="212,86" Point3="260,84"/>
+            <BezierSegment Point1="312,86" Point2="346,142" Point3="351,248"/>
+        </PathFigure>
+    </PathGeometry>
+    <PathGeometry x:Key="Hero/Geo.Band.TopLight">
+        <PathFigure StartPoint="176,255">
+            <BezierSegment Point1="176,149" Point2="211,83" Point3="260,81"/>
+            <BezierSegment Point1="313,83" Point2="349,139" Point3="353,244"/>
+        </PathFigure>
+    </PathGeometry>
+    <PathGeometry x:Key="Hero/Geo.Band.InnerShade">
+        <PathFigure StartPoint="181,252">
+            <BezierSegment Point1="181,158" Point2="215,94" Point3="260,92"/>
+            <BezierSegment Point1="309,94" Point2="343,148" Point3="347,244"/>
+        </PathFigure>
+    </PathGeometry>
+    <!-- 头梁内衬垫（拱腹下的厚软垫弧，上缘与头梁内缘重叠） -->
+    <PathGeometry x:Key="Hero/Geo.Band.Pad">
+        <PathFigure StartPoint="226,112">
+            <QuadraticBezierSegment Point1="258,98" Point2="290,112"/>
+        </PathFigure>
+    </PathGeometry>
+
+    <!-- 远侧耳罩（左）：耳垫月牙只从内缘（右）与底缘露出 -->
+    <EllipseGeometry x:Key="Hero/Geo.Far.Cushion" Center="194,324" RadiusX="60" RadiusY="74">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="-6" CenterX="196" CenterY="316"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <EllipseGeometry x:Key="Hero/Geo.Far.Body" Center="186,310" RadiusX="60" RadiusY="76">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="-6" CenterX="186" CenterY="310"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <EllipseGeometry x:Key="Hero/Geo.Far.Cover" Center="184,308" RadiusX="50" RadiusY="63">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="-6" CenterX="184" CenterY="308"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+
+    <!-- 近侧耳罩（右）：耳垫月牙只从内缘（左）与底缘露出 -->
+    <EllipseGeometry x:Key="Hero/Geo.Near.Cushion" Center="334,325" RadiusX="82" RadiusY="98">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="8" CenterX="331" CenterY="321"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <EllipseGeometry x:Key="Hero/Geo.Near.Body" Center="344,311" RadiusX="84" RadiusY="100">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="8" CenterX="344" CenterY="311"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <EllipseGeometry x:Key="Hero/Geo.Near.Cover" Center="346,309" RadiusX="70" RadiusY="86">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="8" CenterX="346" CenterY="309"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <EllipseGeometry x:Key="Hero/Geo.Near.Ring1" Center="346,309" RadiusX="53" RadiusY="66">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="8" CenterX="346" CenterY="309"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <!-- 右耳罩物理按键点缀（机身右缘的两粒小键） -->
+    <EllipseGeometry x:Key="Hero/Geo.Near.Button1" Center="419,342" RadiusX="3.5" RadiusY="9">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="14" CenterX="419" CenterY="342"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+    <EllipseGeometry x:Key="Hero/Geo.Near.Button2" Center="424,318" RadiusX="3" RadiusY="7">
+        <EllipseGeometry.Transform>
+            <RotateTransform Angle="14" CenterX="424" CenterY="318"/>
+        </EllipseGeometry.Transform>
+    </EllipseGeometry>
+
+    <!-- ═══════════ 浅底版渲染图 ═══════════ -->
+
+    <DrawingImage x:Key="AppImage/HeadphoneHero">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- 1. 地面投影（柔和椭圆，低透明度黑） -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Shadow.Outer}" Brush="{StaticResource Hero/Brush.Shadow.Outer.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Shadow.Core}" Brush="{StaticResource Hero/Brush.Shadow.Core.Light}"/>
+
+                <!-- 2. 头梁（仅描边不填充：开放路径禁止 Brush，否则整拱被填实；
+                     两端在耳罩之后被覆盖，呈"嵌入"效果） -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band}">
+                    <GeometryDrawing.Pen>
+                        <Pen Thickness="34" Brush="{StaticResource Hero/Brush.Band.Light}"
+                             StartLineCap="Round" EndLineCap="Round"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band.InnerShade}" Pen="{StaticResource Hero/Pen.Band.InnerShade.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band.Pad}" Brush="#FF17181A">
+                    <GeometryDrawing.Pen>
+                        <Pen Thickness="9" Brush="#FF17181A" StartLineCap="Round" EndLineCap="Round"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band.TopLight}" Pen="{StaticResource Hero/Pen.Band.TopLight.Light}"/>
+
+                <!-- 3. 远侧耳罩（左，略小略暗）：耳垫 → 机身 → 外盖细节 -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cushion}" Brush="{StaticResource Hero/Brush.Cushion.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cushion}" Pen="{StaticResource Hero/Pen.Cushion.Rim.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Body}" Brush="{StaticResource Hero/Brush.Far.Body.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Body}" Brush="{StaticResource Hero/Brush.Sheen.Body}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cover}" Brush="{StaticResource Hero/Brush.Far.Cover.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cover}" Brush="{StaticResource Hero/Brush.Sheen.Cover}"/>
+
+                <!-- 4. 近侧耳罩（右，大而亮）：耳垫 → 机身 → 外盖同心细节 → 按键 -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cushion}" Brush="{StaticResource Hero/Brush.Cushion.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cushion}" Pen="{StaticResource Hero/Pen.Cushion.Rim.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Body}" Brush="{StaticResource Hero/Brush.Near.Body.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Body}" Brush="{StaticResource Hero/Brush.Sheen.Body}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cover}" Brush="{StaticResource Hero/Brush.Near.Cover.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cover}" Brush="{StaticResource Hero/Brush.Sheen.Cover}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Ring1}" Pen="{StaticResource Hero/Pen.Near.Ring1.Light}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Button1}" Brush="#FF4A4C55"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Button2}" Brush="#FF3E4048"/>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!-- ═══════════ 深底版渲染图（同一几何，提亮材质 + 光晕投影） ═══════════ -->
+
+    <DrawingImage x:Key="AppImage/HeadphoneHero.Dark">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- 1. 冷色弱光晕（替代浅底版的黑投影） -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Shadow.Outer}" Brush="{StaticResource Hero/Brush.Shadow.Outer.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Shadow.Core}" Brush="{StaticResource Hero/Brush.Shadow.Core.Dark}"/>
+
+                <!-- 2. 头梁（仅描边不填充） -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band}">
+                    <GeometryDrawing.Pen>
+                        <Pen Thickness="34" Brush="{StaticResource Hero/Brush.Band.Dark}"
+                             StartLineCap="Round" EndLineCap="Round"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band.InnerShade}" Pen="{StaticResource Hero/Pen.Band.InnerShade.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band.Pad}" Brush="#FF222327">
+                    <GeometryDrawing.Pen>
+                        <Pen Thickness="9" Brush="#FF222327" StartLineCap="Round" EndLineCap="Round"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Band.TopLight}" Pen="{StaticResource Hero/Pen.Band.TopLight.Dark}"/>
+
+                <!-- 3. 远侧耳罩 -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cushion}" Brush="{StaticResource Hero/Brush.Cushion.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cushion}" Pen="{StaticResource Hero/Pen.Cushion.Rim.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Body}" Brush="{StaticResource Hero/Brush.Far.Body.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Body}" Brush="{StaticResource Hero/Brush.Sheen.Body}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cover}" Brush="{StaticResource Hero/Brush.Far.Cover.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Far.Cover}" Brush="{StaticResource Hero/Brush.Sheen.Cover}"/>
+
+                <!-- 4. 近侧耳罩 -->
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cushion}" Brush="{StaticResource Hero/Brush.Cushion.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cushion}" Pen="{StaticResource Hero/Pen.Cushion.Rim.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Body}" Brush="{StaticResource Hero/Brush.Near.Body.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Body}" Brush="{StaticResource Hero/Brush.Sheen.Body}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cover}" Brush="{StaticResource Hero/Brush.Near.Cover.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Cover}" Brush="{StaticResource Hero/Brush.Sheen.Cover}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Ring1}" Pen="{StaticResource Hero/Pen.Near.Ring1.Dark}"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Button1}" Brush="#FF565963"/>
+                <GeometryDrawing Geometry="{StaticResource Hero/Geo.Near.Button2}" Brush="#FF4A4D55"/>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+</ResourceDictionary>

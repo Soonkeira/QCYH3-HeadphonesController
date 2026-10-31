@@ -10,11 +10,17 @@ using QcyH3Tray.Core.Rcsp;
 namespace QcyH3Tray.App;
 
 /// <summary>
-/// 主弹出面板：托盘左键唤起，宽 300、高度自适应，贴系统托盘上方；
-/// Deactivated 自动隐藏（复用不 Close）。头部状态 / 电量 / 噪声控制（四段 +
-/// 等级/场景第二行）/ 均衡器预设 chips / 游戏模式开关 / 设置菜单。
-/// UI 状态统一从 <see cref="AppState"/> 同步；用户操作直接写耳机（乐观显示，
-/// 失败由 <see cref="AppState.RunWriteCommandAsync"/> 重试并计入横幅）。
+/// 托盘快捷面板（阶段 3a 重构）：宽 300、高度自适应，贴系统托盘上方；
+/// Deactivated 自动隐藏（复用不 Close）。结构：头部状态 → 降级横幅（唯一场景）→
+/// 3D 耳机展示位（资源缺失自动折叠）→ 电量（validity 映射）→ 噪声控制（四段 +
+/// 等级/场景子行）→ 均衡器预设 chips（等宽两行）→ 游戏模式 → 页脚（控制中心/设置）。
+/// <para>
+/// UI 状态统一从 <see cref="AppState"/> 同步；交互区（噪声/均衡器/游戏模式）仅在
+/// 连接态且对应字段 validity==<see cref="DataValidity.Available"/> 时可用（禁用并降透明度）。
+/// 用户操作直接写耳机（乐观显示，失败由状态机记账 → Degraded 横幅，写入失败回滚视觉）。
+/// 展示层映射（状态色调 / 电量占位符 / 展示位布局）抽为纯函数（<see cref="PanelPresentations"/>、
+/// <see cref="HeadphoneHeroController"/>）可单测。
+/// </para>
 /// </summary>
 public sealed partial class ControlPanelWindow : Window
 {
@@ -30,15 +36,23 @@ public sealed partial class ControlPanelWindow : Window
     private bool _syncingUi;
     private int _currentLevel = 1;             // 记住最近一次档位（默认中）
     private AncFamily? _currentFamily;         // 记住最近一次模式家族
-    private EqDetailWindow? _eqDetail;
+    private readonly WindowCoordinator _windows;
 
     /// <summary>最近一次被自动隐藏的时间（托盘左键"弹回"宽限用）。</summary>
     public DateTime HiddenAtUtc { get; private set; } = DateTime.MinValue;
 
-    internal ControlPanelWindow(AppState app)
+    /// <summary>
+    /// 打开控制中心的请求（阶段 3b：由 App.xaml.cs 订阅并转发给
+    /// <see cref="WindowCoordinator.ShowControlCenter"/>）。
+    /// 无订阅者时点击显示"开发中"提示（防御性兜底）。
+    /// </summary>
+    public event Action? RequestOpenControlCenter;
+
+    internal ControlPanelWindow(AppState app, WindowCoordinator windows)
     {
         InitializeComponent();
         _app = app;
+        _windows = windows;
 
         _noiseSegments = [SegOff, SegTransparency, SegNoiseCancelling, SegAdaptive];
         _eqPresetChips =
@@ -50,20 +64,25 @@ public sealed partial class ControlPanelWindow : Window
         NoiseSegmentGrid.SizeChanged += (_, _) =>
             LayoutThumb(SelectedSegmentIndex() is int index and >= 0 ? index : 2, animate: false);
 
+        // 3D 耳机展示位：资源存在则显示，不存在整块折叠（接入结构，阶段 5 放入真实渲染图）
+        HeadphoneHeroController.Apply(HeadphoneHero, HeadphoneHeroImage, TryFindResource(HeadphoneHeroController.ResourceKey));
+
         _app.StateUpdated += OnAppStateChanged;
-        _app.CommandHealthChanged += OnCommandHealthChanged;
         _app.AutostartChanged += OnAutostartChanged;
         Closed += (_, _) =>
         {
             _app.StateUpdated -= OnAppStateChanged;
-            _app.CommandHealthChanged -= OnCommandHealthChanged;
             _app.AutostartChanged -= OnAutostartChanged;
         };
     }
 
-    /// <summary>托盘唤起：同步状态 → 贴托盘定位 → 显示 → 入场动画 → 全量刷新/重连。</summary>
+    /// <summary>托盘唤起：还原最小化 → 同步状态 → 贴托盘定位 → 显示 → 入场动画 → 全量刷新/重连。</summary>
     public void Present()
     {
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;   // 防御：最小化时 Show/Activate 不会还原（与控制中心同守卫）
+        }
         SyncFromState();
         PositionAtTray();
         Show();
@@ -105,13 +124,17 @@ public sealed partial class ControlPanelWindow : Window
 
     // ───────────────────────── 定位与动画 ─────────────────────────
 
-    /// <summary>贴系统托盘上方：Left=WorkArea.Right-宽-12，Top=WorkArea.Bottom-高-8。</summary>
+    /// <summary>
+    /// 贴系统托盘上方：Left=WorkArea.Right-宽-12，Top=WorkArea.Bottom-高-8。
+    /// 全程 WPF DIP（SystemParameters.WorkArea 与窗口 Left/Top 同一坐标系，
+    /// 无 WinForms 物理像素混用）；高度计入 RootCard 自身边距（阴影区）。
+    /// </summary>
     private void PositionAtTray()
     {
         var workArea = SystemParameters.WorkArea;
         double availableWidth = Width - RootCard.Margin.Left - RootCard.Margin.Right;
         RootCard.Measure(new Size(availableWidth, double.PositiveInfinity));
-        double height = RootCard.DesiredSize.Height;   // DesiredSize 已含 8×2 外边距
+        double height = RootCard.DesiredSize.Height + RootCard.Margin.Top + RootCard.Margin.Bottom;
 
         Left = workArea.Right - Width - 12;
         Top = Math.Max(workArea.Top, workArea.Bottom - height - 8);
@@ -131,16 +154,6 @@ public sealed partial class ControlPanelWindow : Window
 
     private void OnAppStateChanged() => RefreshFromState();
 
-    private void OnCommandHealthChanged(bool degraded)
-    {
-        ErrorBanner.Visibility = degraded ? Visibility.Visible : Visibility.Collapsed;
-        if (IsVisible)
-        {
-            UpdateLayout();
-            PositionAtTray();
-        }
-    }
-
     private void OnAutostartChanged() => SyncFromState();
 
     private void SyncFromState()
@@ -148,24 +161,35 @@ public sealed partial class ControlPanelWindow : Window
         _syncingUi = true;
         try
         {
-            // 头部状态：已连接=绿，其余=灰；未连接时显示 ↻ 刷新按钮
+            // 头部状态：九态文案（AppState 唯一来源）+ 语义色调画刷；未连接/连接中显示 ↻ 立即重连
             bool connected = _app.IsConnected;
             StatusTextBlock.Text = _app.StateLabel;
-            StatusTextBlock.Foreground = connected
-                ? (Brush)FindResource("ConnectedBrush")
-                : (Brush)FindResource("DisconnectedBrush");
+            StatusTextBlock.ToolTip = _app.StatusText;   // 详细中文状态（如"蓝牙已关闭，打开蓝牙后将自动恢复。"）
+            StatusTextBlock.SetResourceReference(
+                TextBlock.ForegroundProperty, PanelPresentations.BrushKeyFor(PanelPresentations.ToneFor(_app.State)));
             RefreshButton.Visibility = connected ? Visibility.Collapsed : Visibility.Visible;
 
-            // 电量：未连接显示 --
-            BatteryTextBlock.Text = connected && _app.BatteryPercent is int percent
-                ? $"{percent}%"
-                : "--";
+            ApplyBatteryState();
+            ApplyNoiseState(_app.Data);
+            ApplyEqState(_app.Data);
 
-            ApplyNoiseState(_app.Data.NoiseModeInfo);
-            ApplyEqState(_app.Data.EqV1);
+            // 交互区可用性 = 连接态 且 对应字段 validity==Available（plan.md：validity≠Available
+            // 的项禁用并降透明度——禁用样式由容器 IsEnabled 触发器承载）
+            bool interactive = connected;
+            NoiseSection.IsEnabled = interactive && _app.Data.NoiseModeValidity == DataValidity.Available;
+            EqChipsPanel.IsEnabled = interactive && _app.Data.EqValidity == DataValidity.Available;
+            GameModeRow.IsEnabled = interactive && _app.Data.GameModeValidity == DataValidity.Available;
 
-            GameModeSwitch.IsChecked = _app.Data.GameMode == true;
+            // 游戏模式开关位置：有值（Available/Stale）按值显示，Unknown/Loading/Error 不亮
+            // （开关随 GameModeRow 禁用，绝不把未知值当作可交互的"关"）
+            bool gameModeKnown = _app.Data.GameModeValidity is DataValidity.Available or DataValidity.Stale;
+            GameModeSwitch.IsChecked = gameModeKnown && _app.Data.GameMode == true;
 
+            // 电量行右侧小字：链路同步完成的确认（可选信息）
+            BatteryStateCaption.Visibility = connected ? Visibility.Visible : Visibility.Collapsed;
+
+            // 横幅只由 Core 状态机的 Degraded 相驱动（连接态下命令连续失败）；
+            // 未连接/连接失败的文案走状态行，不再出现"未连接也算耳机无响应"（D1）
             ErrorBanner.Visibility = _app.Degraded ? Visibility.Visible : Visibility.Collapsed;
             AutostartMenuItem.IsChecked = _app.IsAutostartEnabled;
         }
@@ -175,10 +199,32 @@ public sealed partial class ControlPanelWindow : Window
         }
     }
 
+    /// <summary>电量按 validity 展示（映射纯函数：<see cref="PanelPresentations.FormatBattery"/>）。</summary>
+    private void ApplyBatteryState()
+    {
+        (string text, BatteryTone tone) = PanelPresentations.FormatBattery(_app.BatteryValidity, _app.BatteryPercent);
+        BatteryTextBlock.Text = text;
+        BatteryTextBlock.SetResourceReference(TextBlock.ForegroundProperty, PanelPresentations.BrushKeyFor(tone));
+    }
+
     // ───────────────────────── 噪声控制 ─────────────────────────
 
-    private void ApplyNoiseState(AncModeInfo? info)
+    private void ApplyNoiseState(DeviceData data)
     {
+        if (data.NoiseModeValidity == DataValidity.Error)
+        {
+            // 读取/写入失败：不高亮任何模式（不拿旧值或默认值当现值）
+            SetChecked(
+                (false, SegOff),
+                (false, SegTransparency),
+                (false, SegNoiseCancelling),
+                (false, SegAdaptive));
+            _currentFamily = null;
+            NoiseSubRow.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var info = data.NoiseModeInfo;
         int segment = info?.Family switch
         {
             AncFamily.Off => 0,
@@ -230,15 +276,16 @@ public sealed partial class ControlPanelWindow : Window
         return -1;
     }
 
-    /// <summary>滑动高亮块到指定段（过渡动画 ~150ms）。</summary>
+    /// <summary>滑动高亮块到指定段（过渡动画 ~150ms；内缩量取自滑块自身 Margin，无魔法数）。</summary>
     private void LayoutThumb(int index, bool animate)
     {
         double column = NoiseSegmentGrid.ActualWidth / _noiseSegments.Length;
+        double inset = NoiseThumb.Margin.Left;
         if (column <= 0 || index < 0)
         {
             return;
         }
-        NoiseThumb.Width = column - 6;
+        NoiseThumb.Width = column - inset * 2;
         double x = index * column;
         if (animate)
         {
@@ -370,8 +417,19 @@ public sealed partial class ControlPanelWindow : Window
 
     // ───────────────────────── 均衡器 ─────────────────────────
 
-    private void ApplyEqState(EqV1Info? info)
+    private void ApplyEqState(DeviceData data)
     {
+        if (data.EqValidity == DataValidity.Error)
+        {
+            // 读取/写入失败：不高亮任何预设（含"默认"——不拿空曲线或旧值当现值）
+            var all = new RadioButton[_eqPresetChips.Length + 1];
+            _eqPresetChips.CopyTo(all, 0);
+            all[^1] = EqCustomChip;
+            SetChecked(all.Select(chip => (Selected: false, Radio: chip)).ToArray());
+            return;
+        }
+
+        EqV1Info? info = data.EqV1;
         if (info is null)
         {
             return;   // 未知曲线：保持现状，不乱高亮
@@ -451,19 +509,7 @@ public sealed partial class ControlPanelWindow : Window
         {
             return;
         }
-        OpenEqDetail();
-    }
-
-    private void OpenEqDetail()
-    {
-        if (_eqDetail is { IsLoaded: true })
-        {
-            _eqDetail.Activate();
-            return;
-        }
-        _eqDetail = new EqDetailWindow(_app);
-        _eqDetail.Show();
-        _eqDetail.Activate();
+        _windows.ShowEqEditor();   // 阶段 3b：EQ 编辑器单例由 WindowCoordinator 管理
     }
 
     // ───────────────────────── 游戏模式 / 页脚 ─────────────────────────
@@ -491,6 +537,25 @@ public sealed partial class ControlPanelWindow : Window
 
     private void OnRefreshClick(object sender, RoutedEventArgs eventArgs)
         => _ = _app.ConnectAsync();
+
+    /// <summary>
+    /// 控制中心入口（阶段 3a 仅预留事件）：有订阅者 → 转发请求；
+    /// 无订阅者（3b 之前）→ 提示开发中。订阅由阶段 3b/TrayHost 接管。
+    /// </summary>
+    private void OnControlCenterClick(object sender, RoutedEventArgs eventArgs)
+    {
+        if (RequestOpenControlCenter is { } handler)
+        {
+            handler.Invoke();
+            return;
+        }
+        MessageBox.Show(
+            this,
+            "控制中心正在开发中，将在后续版本提供。\n当前可继续使用本快捷面板。",
+            "控制中心",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
 
     private void OnSettingsClick(object sender, RoutedEventArgs eventArgs)
     {

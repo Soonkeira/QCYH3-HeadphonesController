@@ -1,0 +1,14 @@
+﻿MENU POPUP rect=2133,1075,213,158
+[ControlType.Menu] name='' enabled=True
+[ControlType.MenuItem] name='打开控制面板' enabled=True
+[ControlType.Text] name='打开控制面板' enabled=True
+[ControlType.MenuItem] name='打开控制中心' enabled=True
+[ControlType.Text] name='打开控制中心' enabled=True
+[ControlType.MenuItem] name='立即重连' enabled=True
+[ControlType.Text] name='立即重连' enabled=True
+[ControlType.MenuItem] name='开机自启' enabled=True
+[ControlType.Text] name='开机自启' enabled=True
+[ControlType.Separator] name='' enabled=False
+[ControlType.MenuItem] name='退出' enabled=True
+[ControlType.Text] name='退出' enabled=True
+

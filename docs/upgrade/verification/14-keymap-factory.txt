@@ -1,0 +1,86 @@
+﻿WINDOW: 按键自定义编辑器 | 830,315,900,750
+[ControlType.Text] name='按物理键编号分组（固件未公开按键的物理位置，请以耳机实际按键为准）；出厂配置只读展示。保存时整表写回耳机：未在编辑器中出现的行保持原值，绝不会丢失。' id='' enabled=True off=False rect=861,375,837,35
+[ControlType.Pane] name='' id='' enabled=True off=False rect=861,423,837,527
+[ControlType.Text] name='按键 0x07' id='' enabled=True off=False rect=882,-143,774,25
+[ControlType.Text] name='物理位置请以耳机实际按键为准。' id='' enabled=True off=False rect=882,-117,774,17
+[ControlType.Text] name='单击' id='' enabled=True off=False rect=882,-88,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,-92,238,27
+[ControlType.Text] name='双击' id='' enabled=True off=False rect=882,-54,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,-58,238,27
+[ControlType.Text] name='三击' id='' enabled=True off=False rect=882,-18,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,-22,238,27
+[ControlType.Text] name='四击' id='' enabled=True off=False rect=882,16,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,12,238,27
+[ControlType.Text] name='长按' id='' enabled=True off=False rect=882,52,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,48,238,27
+[ControlType.Text] name='按键 0x03' id='' enabled=True off=False rect=882,129,774,25
+[ControlType.Text] name='物理位置请以耳机实际按键为准。' id='' enabled=True off=False rect=882,155,774,17
+[ControlType.Text] name='单击' id='' enabled=True off=False rect=882,184,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,180,238,27
+[ControlType.Text] name='双击' id='' enabled=True off=False rect=882,218,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,214,238,27
+[ControlType.Text] name='三击' id='' enabled=True off=False rect=882,254,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,250,238,27
+[ControlType.Text] name='四击' id='' enabled=True off=False rect=882,288,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,284,238,27
+[ControlType.Text] name='长按' id='' enabled=True off=False rect=882,324,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,320,238,27
+[ControlType.Text] name='按键 0x05' id='' enabled=True off=False rect=882,401,774,25
+[ControlType.Text] name='物理位置请以耳机实际按键为准。' id='' enabled=True off=False rect=882,427,774,17
+[ControlType.Text] name='单击' id='' enabled=True off=False rect=882,456,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,452,238,27
+[ControlType.Text] name='双击' id='' enabled=True off=False rect=882,490,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,486,238,27
+[ControlType.Text] name='三击' id='' enabled=True off=False rect=882,526,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,522,238,27
+[ControlType.Text] name='四击' id='' enabled=True off=False rect=882,560,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,556,238,27
+[ControlType.Text] name='长按' id='' enabled=True off=False rect=882,596,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,592,238,27
+[ControlType.Text] name='按键 0x09' id='' enabled=True off=False rect=882,673,774,25
+[ControlType.Text] name='物理位置请以耳机实际按键为准。' id='' enabled=True off=False rect=882,699,774,17
+[ControlType.Text] name='单击' id='' enabled=True off=False rect=882,728,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,724,238,27
+[ControlType.Text] name='双击' id='' enabled=True off=False rect=882,762,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,758,238,27
+[ControlType.Text] name='三击' id='' enabled=True off=False rect=882,798,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,794,238,27
+[ControlType.Text] name='四击' id='' enabled=True off=False rect=882,832,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,828,238,27
+[ControlType.Text] name='长按' id='' enabled=True off=False rect=882,868,536,20
+[ControlType.ComboBox] name='' id='' enabled=True off=False expand=Collapsed rect=1418,864,238,27
+[ControlType.Group] name='出厂配置（只读，20 条，语义未知）' id='FactoryExpander' enabled=True off=False expand=Expanded rect=861,924,816,500
+[ControlType.Button] name='出厂配置（只读，20 条，语义未知）' id='HeaderSite' enabled=True off=False toggle=On rect=863,926,812,24
+[ControlType.Text] name='出厂配置（只读，20 条，语义未知）' id='FactoryHeaderText' enabled=True off=False rect=892,928,257,20
+[ControlType.Text] name='按键 0x07 · 未知(0x81) · 未知(0x80)（keyNum=0x07 action=0x81 function=0x80）' id='' enabled=False off=False rect=883,986,772,17
+[ControlType.Text] name='按键 0x07 · 未知(0x82) · 未知(0x80)（keyNum=0x07 action=0x82 function=0x80）' id='' enabled=False off=False rect=883,1007,772,17
+[ControlType.Text] name='按键 0x07 · 未知(0x83) · 未知(0x80)（keyNum=0x07 action=0x83 function=0x80）' id='' enabled=False off=False rect=883,1028,772,17
+[ControlType.Text] name='按键 0x07 · 未知(0x84) · 未知(0x80)（keyNum=0x07 action=0x84 function=0x80）' id='' enabled=False off=False rect=883,1049,772,17
+[ControlType.Text] name='按键 0x07 · 未知(0x85) · 未知(0x80)（keyNum=0x07 action=0x85 function=0x80）' id='' enabled=False off=False rect=883,1070,772,17
+[ControlType.Text] name='按键 0x03 · 未知(0x81) · 未知(0x80)（keyNum=0x03 action=0x81 function=0x80）' id='' enabled=False off=False rect=883,1091,772,17
+[ControlType.Text] name='按键 0x03 · 未知(0x82) · 未知(0x80)（keyNum=0x03 action=0x82 function=0x80）' id='' enabled=False off=False rect=883,1112,772,17
+[ControlType.Text] name='按键 0x03 · 未知(0x83) · 未知(0x80)（keyNum=0x03 action=0x83 function=0x80）' id='' enabled=False off=False rect=883,1133,772,17
+[ControlType.Text] name='按键 0x03 · 未知(0x84) · 未知(0x80)（keyNum=0x03 action=0x84 function=0x80）' id='' enabled=False off=False rect=883,1154,772,17
+[ControlType.Text] name='按键 0x03 · 未知(0x85) · 未知(0x80)（keyNum=0x03 action=0x85 function=0x80）' id='' enabled=False off=False rect=883,1175,772,17
+[ControlType.Text] name='按键 0x05 · 未知(0x81) · 未知(0x80)（keyNum=0x05 action=0x81 function=0x80）' id='' enabled=False off=False rect=883,1196,772,17
+[ControlType.Text] name='按键 0x05 · 未知(0x82) · 未知(0x80)（keyNum=0x05 action=0x82 function=0x80）' id='' enabled=False off=False rect=883,1217,772,17
+[ControlType.Text] name='按键 0x05 · 未知(0x83) · 未知(0x80)（keyNum=0x05 action=0x83 function=0x80）' id='' enabled=False off=False rect=883,1238,772,17
+[ControlType.Text] name='按键 0x05 · 未知(0x84) · 未知(0x80)（keyNum=0x05 action=0x84 function=0x80）' id='' enabled=False off=False rect=883,1259,772,17
+[ControlType.Text] name='按键 0x05 · 未知(0x85) · 未知(0x80)（keyNum=0x05 action=0x85 function=0x80）' id='' enabled=False off=False rect=883,1280,772,17
+[ControlType.Text] name='按键 0x09 · 未知(0x81) · 无功能（APK 127→0 归一化）（keyNum=0x09 action=0x81 function=0x7F）' id='' enabled=False off=False rect=883,1301,772,17
+[ControlType.Text] name='按键 0x09 · 未知(0x82) · 未知(0x80)（keyNum=0x09 action=0x82 function=0x80）' id='' enabled=False off=False rect=883,1322,772,17
+[ControlType.Text] name='按键 0x09 · 未知(0x83) · 未知(0x80)（keyNum=0x09 action=0x83 function=0x80）' id='' enabled=False off=False rect=883,1343,772,17
+[ControlType.Text] name='按键 0x09 · 未知(0x84) · 未知(0x80)（keyNum=0x09 action=0x84 function=0x80）' id='' enabled=False off=False rect=883,1364,772,17
+[ControlType.Text] name='按键 0x09 · 未知(0x85) · 未知(0x80)（keyNum=0x09 action=0x85 function=0x80）' id='' enabled=False off=False rect=883,1385,772,17
+[ControlType.ScrollBar] name='' id='VerticalScrollBar' enabled=True off=False range=469.6 rect=1677,423,21,527
+[ControlType.Button] name='' id='PART_LineUpButton' enabled=False off=False rect=1677,423,21,21
+[ControlType.Button] name='' id='PageUp' enabled=False off=False rect=1677,444,21,179
+[ControlType.Button] name='' id='PageDown' enabled=False off=False rect=1677,784,21,145
+[ControlType.Thumb] name='' id='' enabled=False off=False rect=1677,623,21,161
+[ControlType.Button] name='' id='PART_LineDownButton' enabled=False off=False rect=1677,929,21,21
+[ControlType.Button] name='读自耳机' id='ReadButton' enabled=True off=False rect=861,964,99,40
+[ControlType.Text] name='读自耳机' id='' enabled=True off=False rect=879,974,62,20
+[ControlType.Button] name='保存到耳机' id='SaveButton' enabled=True off=False rect=1585,964,113,40
+[ControlType.Text] name='保存到耳机' id='' enabled=True off=False rect=1603,974,78,20
+[ControlType.Text] name='已读取耳机按键配置（40 条映射，其中出厂配置 20 条）。' id='HintTextBlock' enabled=True off=False rect=861,1017,837,17
+

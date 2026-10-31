@@ -1,0 +1,204 @@
+﻿<Window x:Class="QcyH3Tray.App.EqEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="均衡器编辑器"
+        Width="680"
+        Height="580"
+        MinWidth="640"
+        MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Brush/Surface}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType">
+    <!--
+      EQ 编辑器（阶段 3b 重构，替换 EqDetailWindow，plan.md P1-2 #1）：
+      顶部 7 段曲线画布（Polyline 折线 + 0dB 虚线基线对比）→ 总增益滑块 → 七段竖滑块
+      （-12.0~+12.0 dB、0.5 步进、每段 dB 数值 + Q 只读显示）→ 设备操作按钮 →
+      本地配置（保存/加载/覆盖/删除/导入/导出 JSON）。
+      铁律：只有 7 段原生通道（EqV1BandMap），不做十段视觉伪装；写走
+      Manager.SetEqV1Async（Core 已带回读确认 + 乐观快照）。
+      未保存修改（dirty）关闭时三选提示：应用并关闭 / 放弃 / 取消。
+    -->
+    <Window.Resources>
+        <Style x:Key="Card" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{StaticResource Brush/Surface.Card}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
+            <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>
+        </Style>
+
+        <Style x:Key="NoteText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontSize" Value="{StaticResource Font/Size.Caption}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush/Text.Tertiary}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <!-- 编辑区（滑块）禁用时降透明度 -->
+        <Style x:Key="DisabledFade" TargetType="{x:Type Grid}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="{StaticResource Opacity/Disabled}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 曲线刻度小字 -->
+        <Style x:Key="CurveScaleText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontSize" Value="{StaticResource Font/Size.Caption}"/>
+            <Setter Property="LineHeight" Value="{StaticResource Font/Line.Caption}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush/Text.Tertiary}"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,2,4,2"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="18" TextElement.FontFamily="{StaticResource Font/Primary}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ───────── 1. 曲线画布（实时跟随滑块；虚线 = 0dB 平线基线） ───────── -->
+        <Border Style="{StaticResource Card}" Padding="12,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Canvas x:Name="CurveCanvas" Height="170" ClipToBounds="True">
+                    <Polyline x:Name="BaselineLine"
+                              Stroke="{StaticResource Brush/Text.Tertiary}"
+                              StrokeThickness="1"
+                              StrokeDashArray="3 2"/>
+                    <Polyline x:Name="CurveLine"
+                              Stroke="{StaticResource Brush/Accent}"
+                              StrokeThickness="2"
+                              StrokeLineJoin="Round"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"/>
+                </Canvas>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="+12" Style="{StaticResource CurveScaleText}"/>
+                    <TextBlock Text="0" Style="{StaticResource CurveScaleText}"/>
+                    <TextBlock Text="-12" Style="{StaticResource CurveScaleText}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ───────── 2. 总增益 ───────── -->
+        <Grid x:Name="MasterGainRow" Style="{StaticResource DisabledFade}" Grid.Row="1" Margin="0,14,0,0" IsEnabled="False">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid>
+                <TextBlock Text="总增益"
+                           FontSize="{StaticResource Font/Size.Body}"
+                           LineHeight="{StaticResource Font/Line.Body}"
+                           Foreground="{StaticResource Brush/Text.Primary}"/>
+                <TextBlock x:Name="MasterGainText" Text="0.0 dB"
+                           FontSize="{StaticResource Font/Size.Body}"
+                           LineHeight="{StaticResource Font/Line.Body}"
+                           Foreground="{StaticResource Brush/Text.Secondary}"
+                           HorizontalAlignment="Right"/>
+            </Grid>
+            <Slider x:Name="MasterGainSlider"
+                    Grid.Row="1"
+                    Style="{StaticResource EqSliderHorizontal}"
+                    Margin="0,6,0,0"
+                    Minimum="-12" Maximum="12"
+                    TickFrequency="0.5"
+                    IsSnapToTickEnabled="True"
+                    IsMoveToPointEnabled="True"
+                    ValueChanged="OnSliderValueChanged"/>
+        </Grid>
+
+        <!-- ───────── 3. 七段竖滑块（代码生成：dB 值 / Q 只读 / 滑块 / 频率） ───────── -->
+        <Grid x:Name="BandArea" Style="{StaticResource DisabledFade}" Grid.Row="2" Margin="0,6,0,0" IsEnabled="False">
+            <Grid x:Name="BandGrid"/>
+        </Grid>
+
+        <!-- ───────── 4. 设备操作按钮 ───────── -->
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="ReadButton" Style="{StaticResource SecondaryButton}"
+                        Content="读自耳机" Click="OnReadClick"/>
+                <Button x:Name="RestoreButton" Style="{StaticResource SecondaryButton}"
+                        Content="恢复耳机当前值" Margin="{StaticResource Spacing/Gap}" Click="OnRestoreClick"/>
+                <Button x:Name="ResetButton" Style="{StaticResource SecondaryButton}"
+                        Content="重置为平线" Margin="{StaticResource Spacing/Gap}" Click="OnResetClick"/>
+            </StackPanel>
+            <Button x:Name="ApplyButton" Style="{StaticResource AccentButton}"
+                    Content="应用到耳机" HorizontalAlignment="Right" Click="OnApplyClick"/>
+        </Grid>
+
+        <!-- ───────── 5. 状态提示 ───────── -->
+        <TextBlock x:Name="HintTextBlock"
+                   Grid.Row="4"
+                   Margin="0,10,0,0"
+                   Style="{StaticResource NoteText}"
+                   Text="正在读取耳机当前均衡器…"/>
+
+        <!-- ───────── 6. 本地配置 ───────── -->
+        <Border Grid.Row="5" Style="{StaticResource Card}" Margin="0,10,0,0">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="本地配置"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource Font/Size.Body}"
+                               LineHeight="{StaticResource Font/Line.Body}"
+                               Foreground="{StaticResource Brush/Text.Primary}"/>
+                    <ComboBox x:Name="ProfileCombo"
+                              Grid.Column="1"
+                              MinWidth="150"
+                              Margin="{StaticResource Spacing/Gap}"
+                              VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button x:Name="LoadProfileButton" Style="{StaticResource SecondaryButton}"
+                                Content="加载" Click="OnProfileLoadClick"/>
+                        <Button x:Name="OverwriteProfileButton" Style="{StaticResource SecondaryButton}"
+                                Content="覆盖" Margin="{StaticResource Spacing/Gap}" Click="OnProfileOverwriteClick"/>
+                        <Button x:Name="DeleteProfileButton" Style="{StaticResource SecondaryButton}"
+                                Content="删除" Margin="{StaticResource Spacing/Gap}" Click="OnProfileDeleteClick"/>
+                        <Button x:Name="ImportProfileButton" Style="{StaticResource SecondaryButton}"
+                                Content="导入…" Margin="{StaticResource Spacing/Gap}" Click="OnProfileImportClick"/>
+                        <Button x:Name="ExportProfileButton" Style="{StaticResource SecondaryButton}"
+                                Content="导出…" Margin="{StaticResource Spacing/Gap}" Click="OnProfileExportClick"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="另存为"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource Font/Size.Body}"
+                               LineHeight="{StaticResource Font/Line.Body}"
+                               Foreground="{StaticResource Brush/Text.Primary}"/>
+                    <TextBox x:Name="ProfileNameBox"
+                             Style="{StaticResource FormTextBox}"
+                             Grid.Column="1"
+                             MinWidth="150"
+                             Margin="{StaticResource Spacing/Gap}"
+                             VerticalAlignment="Center"/>
+                    <Button x:Name="SaveProfileButton" Style="{StaticResource SecondaryButton}"
+                            Grid.Column="2" Content="保存" Click="OnProfileSaveClick"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

@@ -2,14 +2,16 @@ using System.Windows;
 using System.Windows.Controls;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
+using QcyH3Tray.Core.App;
 using Icon = System.Drawing.Icon;
 
 namespace QcyH3Tray.App;
 
 /// <summary>
 /// 托盘宿主（H.NotifyIcon.Wpf）：
-/// 图标 = 电量数字徽章（<see cref="BatteryIconRenderer"/>），随电量/连接状态刷新；
-/// 左键 = 切换主面板显示/隐藏；右键菜单：打开控制面板 / 立即重连 / 开机自启 / 退出。
+/// 图标 = 迷你耳机剪影 + 电量徽章（<see cref="TrayIconRenderer"/>），随电量/连接状态刷新；
+/// 左键 = 切换主面板显示/隐藏；右键菜单：打开控制面板 / 打开控制中心 / 立即重连 / 开机自启 / 退出；
+/// 气泡通知 = 低电量提醒（阶段 6，<see cref="TrayNotificationService"/>）。
 /// </summary>
 internal sealed class TrayHost : IDisposable
 {
@@ -17,24 +19,36 @@ internal sealed class TrayHost : IDisposable
     private static readonly TimeSpan TrayClickHideGrace = TimeSpan.FromMilliseconds(400);
 
     private readonly AppState _app;
+    private readonly WindowCoordinator _windows;
     private readonly TaskbarIcon _icon;
+    private readonly TrayNotificationService _notifications;
+    private Icon? _lastIcon;                   // 渲染结果不变时不重复赋值（缓存命中即同实例）
     private MenuItem _autostartItem = null!;
     private ControlPanelWindow? _panel;
 
-    public TrayHost(AppState app)
+    /// <summary>打开控制中心的请求（菜单项 / 快捷面板页脚）：由 App.xaml.cs 订阅统一处理。</summary>
+    public event Action? RequestOpenControlCenter;
+
+    /// <summary>托盘气泡通知（阶段 6：低电量提醒等；Win10+ 呈现为 toast）。</summary>
+    public INotificationService Notifications => _notifications;
+
+    public TrayHost(AppState app, WindowCoordinator windows)
     {
         _app = app;
+        _windows = windows;
         _icon = new TaskbarIcon
         {
             ToolTipText = "QCY H3 — 未连接",
             MenuActivation = PopupActivationMode.RightClick,
-            Icon = BatteryIconRenderer.GetIcon("?", BatteryIconRenderer.Gray),
+            Icon = TrayIconRenderer.GetIcon(null),
         };
+        _notifications = new TrayNotificationService(() => _icon.IsCreated ? _icon : null);
         _icon.TrayLeftMouseUp += OnTrayLeftMouseUp;
         _icon.ContextMenu = BuildContextMenu();
 
         _app.StateUpdated += OnStateChanged;
         _app.AutostartChanged += OnAutostartChanged;
+        _app.LowBatteryAlert += OnLowBatteryAlert;
         UpdateVisual();
         CreateTrayIcon();
     }
@@ -71,6 +85,9 @@ internal sealed class TrayHost : IDisposable
         var openItem = new MenuItem { Header = "打开控制面板" };
         openItem.Click += (_, _) => TogglePanel();
 
+        var controlCenterItem = new MenuItem { Header = "打开控制中心" };
+        controlCenterItem.Click += (_, _) => RequestOpenControlCenter?.Invoke();
+
         var reconnectItem = new MenuItem { Header = "立即重连" };
         reconnectItem.Click += (_, _) => _ = _app.ConnectAsync();
 
@@ -87,6 +104,7 @@ internal sealed class TrayHost : IDisposable
 
         var menu = new ContextMenu();
         menu.Items.Add(openItem);
+        menu.Items.Add(controlCenterItem);
         menu.Items.Add(reconnectItem);
         menu.Items.Add(_autostartItem);
         menu.Items.Add(new Separator());
@@ -112,10 +130,26 @@ internal sealed class TrayHost : IDisposable
         PresentPanel();
     }
 
-    /// <summary>外部唤起（第二实例激活信号）：不做切换，总是弹出主面板。仅 UI 线程调用。</summary>
+    /// <summary>
+    /// 外部唤起（第二实例激活信号）：不做切换，总是弹出主面板。仅 UI 线程调用。
+    /// 面板被 Alt+F4 等关闭后（IsLoaded=false）重建新实例——对已 Close 的窗口
+    /// 调 Show() 会抛 InvalidOperationException 且被全局钩子吞掉，导致托盘左键永久失效（D6）。
+    /// </summary>
     public void PresentPanel()
     {
-        _panel ??= new ControlPanelWindow(_app);
+        if (_panel is not { IsLoaded: true })
+        {
+            var panel = new ControlPanelWindow(_app, _windows);
+            panel.RequestOpenControlCenter += () => RequestOpenControlCenter?.Invoke();
+            panel.Closed += (_, _) =>
+            {
+                if (ReferenceEquals(_panel, panel))
+                {
+                    _panel = null;   // 关闭后清引用，下次唤起重建
+                }
+            };
+            _panel = panel;
+        }
         _panel.Present();
     }
 
@@ -131,6 +165,20 @@ internal sealed class TrayHost : IDisposable
     private void OnAutostartChanged()
         => _autostartItem.IsChecked = _app.IsAutostartEnabled;
 
+    /// <summary>
+    /// 低电量提醒（阶段 6）：触发链 = <see cref="AppState.LowBatteryAlert"/>（判定纯函数
+    /// <see cref="LowBatteryAdvisor"/>）→ 本方法记录信息日志并经 <see cref="INotificationService"/>
+    /// 弹气泡（标题/正文文案按产品文案，图标用应用图标）。
+    /// </summary>
+    private void OnLowBatteryAlert(int percent)
+    {
+        ErrorLog.Write($"低电量提醒：当前电量 {percent}%（阈值 {_app.Config.LowBatteryThresholdPercent}%）。");
+        _notifications.Show(
+            "QCY H3 电量低",
+            $"当前电量 {percent}%，请及时放入充电",
+            NotificationKind.Warning);
+    }
+
     private void SetAutostart(bool enabled)
     {
         try
@@ -144,13 +192,25 @@ internal sealed class TrayHost : IDisposable
         }
     }
 
-    /// <summary>托盘图标与 Tooltip：已连接 = 「QCY H3 — 已连接\n电量 80%」；否则 = 「QCY H3 — {状态}」。</summary>
+    /// <summary>
+    /// 托盘图标与 Tooltip：已连接且电量有效 = 「QCY H3 — 已连接\n电量 80%」；
+    /// 否则 = 「QCY H3 — {状态}」。图标 = 耳机剪影 + 电量徽章（<see cref="TrayIconRenderer"/>），
+    /// 电量仅在 Available（读取成功且新鲜）时展示数字徽章，Unknown/Error/Stale/断连 =
+    /// 灰剪影无徽章（不得把旧值/未知值当作现值；完整状态在 tooltip）。
+    /// 渲染结果（缓存同实例）不变时不重复赋值 <c>_icon.Icon</c>（避免重建原生句柄，plan D13）。
+    /// </summary>
     private void UpdateVisual()
     {
-        int? percent = _app.IsConnected ? _app.BatteryPercent : null;
-        string badgeText = percent is int value ? value.ToString() : "?";
-        Icon icon = BatteryIconRenderer.GetIcon(badgeText, BatteryIconRenderer.ColorFor(percent));
-        _icon.Icon = icon;
+        bool connected = _app.IsConnected;
+        int? percent = connected && _app.BatteryValidity == DataValidity.Available
+            ? _app.BatteryPercent
+            : null;
+        Icon icon = TrayIconRenderer.GetIcon(percent);
+        if (!ReferenceEquals(icon, _lastIcon))
+        {
+            _lastIcon = icon;
+            _icon.Icon = icon;
+        }
         _icon.ToolTipText = percent is int battery
             ? $"QCY H3 — 已连接\n电量 {battery}%"
             : $"QCY H3 — {_app.StateLabel}";
@@ -160,8 +220,9 @@ internal sealed class TrayHost : IDisposable
     {
         _app.StateUpdated -= OnStateChanged;
         _app.AutostartChanged -= OnAutostartChanged;
+        _app.LowBatteryAlert -= OnLowBatteryAlert;
         _icon.TrayLeftMouseUp -= OnTrayLeftMouseUp;
         _icon.Dispose();
-        BatteryIconRenderer.ClearCache();
+        TrayIconRenderer.ClearCache();
     }
 }

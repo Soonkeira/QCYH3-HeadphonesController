@@ -1,0 +1,57 @@
+﻿WINDOW: QCY H3 控制中心 | 805,315,950,750
+[ControlType.Text] name='QCY H3' id='' enabled=True off=False rect=834,373,199,25
+[ControlType.Text] name='控制中心' id='' enabled=True off=False rect=834,398,199,20
+[ControlType.RadioButton] name='概览' id='NavOverview' enabled=True off=False selected=False rect=834,440,199,44
+[ControlType.Text] name='概览' id='' enabled=True off=False rect=876,451,35,22
+[ControlType.RadioButton] name='降噪' id='NavNoise' enabled=True off=False selected=False rect=834,490,199,44
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=876,501,35,22
+[ControlType.RadioButton] name='声音' id='NavSound' enabled=True off=False selected=False rect=834,538,199,44
+[ControlType.Text] name='声音' id='' enabled=True off=False rect=876,549,35,22
+[ControlType.RadioButton] name='功能' id='NavFeature' enabled=True off=False selected=False rect=834,588,199,44
+[ControlType.Text] name='功能' id='' enabled=True off=False rect=876,599,35,22
+[ControlType.RadioButton] name='连接' id='NavConnection' enabled=True off=False selected=False rect=834,636,199,44
+[ControlType.Text] name='连接' id='' enabled=True off=False rect=876,647,35,22
+[ControlType.RadioButton] name='设置' id='NavSettings' enabled=True off=False selected=True rect=834,686,199,44
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=876,697,35,22
+[ControlType.Pane] name='' id='' enabled=True off=False rect=1054,353,692,703
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=1084,378,611,33
+[ControlType.Text] name='开机自启' id='' enabled=True off=False rect=1105,447,569,22
+[ControlType.Text] name='登录 Windows 后自动运行（写入当前用户注册表 Run 键）。' id='' enabled=True off=False rect=1105,471,569,17
+[ControlType.Button] name='' id='AutostartSwitch' enabled=True off=False toggle=Off rect=1629,455,45,25
+[ControlType.Text] name='启动时静默后台：应用常驻系统托盘，不弹出窗口；检测到耳机后自动连接并同步状态。' id='' enabled=True off=False rect=1105,503,569,17
+[ControlType.Text] name='通知' id='' enabled=True off=False rect=1084,561,611,17
+[ControlType.Text] name='桌面通知' id='' enabled=True off=False rect=1105,609,569,22
+[ControlType.Text] name='通过系统托盘气泡推送提醒（Windows 10 及以上呈现为系统通知）。' id='' enabled=True off=False rect=1105,633,569,17
+[ControlType.Button] name='' id='NotificationsSwitch' enabled=True off=False toggle=On rect=1629,617,45,25
+[ControlType.Separator] name='' id='' enabled=False off=False rect=1105,665,569,1
+[ControlType.Text] name='低电量提醒阈值' id='' enabled=True off=False rect=1105,681,431,22
+[ControlType.Text] name='电量不高于该值时提醒一次；恢复到阈值 +10% 以上或重新连接后可再次提醒。' id='' enabled=True off=False rect=1105,705,431,35
+[ControlType.ComboBox] name='' id='LowBatteryThresholdCombo' enabled=True off=False expand=Collapsed rect=1536,697,138,27
+[ControlType.Text] name='关于' id='' enabled=True off=False rect=1084,781,611,17
+[ControlType.Text] name='版本' id='' enabled=True off=False rect=1105,829,569,22
+[ControlType.Text] name='1.0.0' id='AboutVersionText' enabled=True off=False rect=1639,829,35,22
+[ControlType.Text] name='项目地址： github.com/Soonkeira/QCYH3-HeadphonesController' id='' enabled=True off=False rect=1105,863,569,17
+[ControlType.Hyperlink] name='github.com/Soonkeira/QCYH3-HeadphonesController' id='' enabled=True off=False rect=1178,863,355,17
+[ControlType.Text] name='开源致谢：H.NotifyIcon（系统托盘）、.NET 8 / WPF；协议逆向参考 qcy-h3-controller（Python）、Quicky（Go）等开源项目。' id='' enabled=True off=False rect=1105,887,569,35
+[ControlType.Text] name='协议来源：BLE RCSP（杰理 JieLi 芯片私有协议），经真机抓包与开源参考实现逆向验证；UI 仅提供真机验证过的读写通道。' id='' enabled=True off=False rect=1105,931,569,35
+[ControlType.Text] name='诊断' id='' enabled=True off=False rect=1084,1007,611,17
+[ControlType.Group] name='诊断信息' id='' enabled=True off=False expand=Expanded rect=1084,1034,611,232
+[ControlType.Button] name='诊断信息' id='HeaderSite' enabled=True off=False toggle=On rect=1086,1036,607,24
+[ControlType.Text] name='诊断信息' id='' enabled=True off=False rect=1115,1038,62,20
+[ControlType.Text] name='连接状态' id='' enabled=True off=False rect=1106,1092,567,22
+[ControlType.Text] name='已连接（Connected）' id='DiagStateText' enabled=True off=False rect=1514,1092,159,22
+[ControlType.Text] name='状态详情' id='' enabled=True off=False rect=1106,1124,567,22
+[ControlType.Text] name='已连接 84:AC:60:FF:C1:2D' id='DiagStatusText' enabled=True off=False rect=1487,1124,186,22
+[ControlType.Text] name='数据有效性：电量 Available · 降噪 Available · EQ Available · 游戏模式 Available' id='DiagValidityText' enabled=True off=False rect=1106,1158,567,17
+[ControlType.Text] name='日志文件' id='' enabled=True off=False rect=1106,1188,567,35
+[ControlType.Button] name='' id='OpenLogFolderButton' enabled=True off=False rect=1541,1188,132,35
+[ControlType.Text] name='' id='' enabled=True off=False rect=1549,1196,16,16
+[ControlType.Text] name='打开日志文件夹' id='' enabled=True off=False rect=1570,1196,96,17
+[ControlType.Text] name='C:\Users\19767\AppData\Local\QcyH3Tray\error.log' id='DiagLogPathText' enabled=True off=False rect=1106,1227,567,17
+[ControlType.ScrollBar] name='' id='VerticalScrollBar' enabled=True off=False range=0 rect=1725,353,21,703
+[ControlType.Button] name='' id='PART_LineUpButton' enabled=False off=False rect=1725,353,21,21
+[ControlType.Button] name='' id='PageUp' enabled=False off=False rect=Empty
+[ControlType.Button] name='' id='PageDown' enabled=False off=False rect=1725,867,21,168
+[ControlType.Thumb] name='' id='' enabled=False off=False rect=1725,374,21,493
+[ControlType.Button] name='' id='PART_LineDownButton' enabled=False off=False rect=1725,1035,21,21
+

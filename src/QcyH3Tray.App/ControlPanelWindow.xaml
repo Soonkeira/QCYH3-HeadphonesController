@@ -11,13 +11,26 @@
         ResizeMode="NoResize"
         Topmost="True"
         ShowActivated="True"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
         Deactivated="OnDeactivated"
         PreviewKeyDown="OnPreviewKeyDown">
+    <!--
+      托盘快捷面板（阶段 3a 重构，plan.md P1-1 #2）：
+      头部状态 → 降级横幅（唯一场景）→ 3D 耳机展示位（资源缺失自动折叠）→ 电量
+      （validity 映射）→ 噪声控制（四段 + 等级/场景子行）→ 均衡器 chips（等宽两行）
+      → 游戏模式 → 页脚（控制中心 / 设置）。
+      机制保持不变：无边框 + 透明 + Topmost + 不进任务栏 + Deactivated 收起复用；
+      窗口级 UseLayoutRounding / SnapsToDevicePixels / Ideal + ClearType（D2 根治之三）。
+    -->
     <Border x:Name="RootCard"
             Margin="8"
-            Background="#FFFFFF"
-            CornerRadius="16"
-            Padding="18">
+            Background="{StaticResource Brush/Surface.Card}"
+            CornerRadius="{StaticResource CornerRadius/Card}"
+            Padding="{StaticResource Spacing/Card.Padding}"
+            TextElement.FontFamily="{StaticResource Font/Primary}">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.38"/>
         </Border.Effect>
@@ -26,205 +39,268 @@
         </Border.RenderTransform>
         <StackPanel>
 
-            <!-- 1. 头部行：标题 + 状态（未连接时附 ↻ 刷新） -->
+            <!-- 1. 头部：设备名 + 九态状态文字（非 Connected 态附 ↻ 立即重连） -->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="QCY H3"
-                           FontSize="14"
+                           FontSize="{StaticResource Font/Size.Subtitle}"
+                           LineHeight="{StaticResource Font/Line.Subtitle}"
                            FontWeight="SemiBold"
-                           Foreground="#1F1F1F"
+                           Foreground="{StaticResource Brush/Text.Primary}"
                            VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="RefreshButton"
-                            Style="{StaticResource IconButton}"
-                            Content="↻"
-                            FontSize="13"
-                            ToolTip="重新连接耳机"
-                            Visibility="Collapsed"
-                            Click="OnRefreshClick"/>
                     <TextBlock x:Name="StatusTextBlock"
                                Text="未连接"
-                               FontSize="11"
-                               Foreground="#9E9E9E"
-                               Margin="2,0,0,0"
+                               FontSize="{StaticResource Font/Size.Caption}"
+                               LineHeight="{StaticResource Font/Line.Caption}"
+                               Foreground="{StaticResource Brush/Text.Tertiary}"
                                VerticalAlignment="Center"/>
+                    <Button x:Name="RefreshButton"
+                            Style="{StaticResource IconButton}"
+                            Margin="{StaticResource Spacing/Gap}"
+                            ToolTip="立即重连"
+                            Visibility="Collapsed"
+                            Click="OnRefreshClick">
+                        <TextBlock FontFamily="{StaticResource Font/Icon}" Text="&#xE72C;"
+                                   FontSize="{StaticResource Font/Size.Body}"/>
+                    </Button>
                 </StackPanel>
             </Grid>
 
-            <!-- 2. "耳机无响应"横幅（连续 2 次写命令失败） -->
+            <!-- 2. 降级横幅（唯一场景：Core 状态机 Degraded 相——连接态下命令连续失败） -->
             <Border x:Name="ErrorBanner"
-                    Background="#33D32F2F"
-                    CornerRadius="8"
-                    Padding="10,6"
-                    Margin="0,10,0,0"
+                    Style="{StaticResource Banner}"
+                    Margin="{StaticResource Spacing/Block.Small}"
                     Visibility="Collapsed">
-                <TextBlock Text="耳机无响应"
-                           FontSize="11"
-                           Foreground="#D32F2F"/>
+                <TextBlock Text="耳机无响应，正在重试"
+                           LineHeight="{StaticResource Font/Line.Caption}"/>
             </Border>
 
-            <!-- 3. 电量 -->
-            <TextBlock Text="电量" Style="{StaticResource SectionLabel}"/>
-            <TextBlock x:Name="BatteryTextBlock"
-                       Text="--"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Foreground="#1F1F1F"/>
-
-            <!-- 4. 噪声控制：四段分段控件 -->
-            <TextBlock Text="噪声控制" Style="{StaticResource SectionLabel}"/>
-            <Border Height="36"
-                    CornerRadius="9"
-                    Background="#F0F0F0"
-                    ClipToBounds="True">
-                <Grid>
-                    <Border x:Name="NoiseThumb"
-                            Width="56"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Stretch"
-                            Margin="3,3,0,3"
-                            CornerRadius="7"
-                            Background="#4D4D4D"
-                            IsHitTestVisible="False">
-                        <Border.RenderTransform>
-                            <TranslateTransform x:Name="NoiseThumbShift"/>
-                        </Border.RenderTransform>
-                    </Border>
-                    <Grid x:Name="NoiseSegmentGrid">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="SegOff"
-                                     Style="{StaticResource SegmentRadioButton}"
-                                     GroupName="noiseSegment"
-                                     Content="关闭"
-                                     Checked="OnSegmentChecked"/>
-                        <RadioButton x:Name="SegTransparency"
-                                     Grid.Column="1"
-                                     Style="{StaticResource SegmentRadioButton}"
-                                     GroupName="noiseSegment"
-                                     Content="通透"
-                                     Checked="OnSegmentChecked"/>
-                        <RadioButton x:Name="SegNoiseCancelling"
-                                     Grid.Column="2"
-                                     Style="{StaticResource SegmentRadioButton}"
-                                     GroupName="noiseSegment"
-                                     Content="降噪"
-                                     Checked="OnSegmentChecked"/>
-                        <RadioButton x:Name="SegAdaptive"
-                                     Grid.Column="3"
-                                     Style="{StaticResource SegmentRadioButton}"
-                                     GroupName="noiseSegment"
-                                     Content="自适应"
-                                     Checked="OnSegmentChecked"/>
-                    </Grid>
-                </Grid>
+            <!-- 3. 3D 耳机展示位：AppImage/HeadphoneHero 资源存在则显示，
+                 不存在（当前阶段 5 未放入矢量渲染图）整块折叠为 0 高，不放占位位图 -->
+            <Border x:Name="HeadphoneHero"
+                    Height="{StaticResource Size/Hero.Height}"
+                    Margin="{StaticResource Spacing/Block.Small}"
+                    Visibility="Collapsed">
+                <Image x:Name="HeadphoneHeroImage"
+                       Stretch="Uniform"
+                       MaxHeight="{StaticResource Size/Hero.Height}"/>
             </Border>
 
-            <!-- 4b. 第二行：降噪等级（低/中/高）+ 场景（通勤/室内/抗风） -->
-            <Grid x:Name="NoiseSubRow" Margin="0,8,0,0" Visibility="Collapsed">
+            <!-- 4. 电量：标签 + validity 小字 + 大号百分比 -->
+            <Grid Margin="{StaticResource Spacing/Block}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="LevelLow"
-                                 Style="{StaticResource SmallChipRadioButton}"
-                                 GroupName="noiseLevel"
-                                 Content="低"
-                                 Checked="OnLevelChecked"/>
-                    <RadioButton x:Name="LevelMedium"
-                                 Style="{StaticResource SmallChipRadioButton}"
-                                 GroupName="noiseLevel"
-                                 Content="中"
-                                 Margin="5,0,0,0"
-                                 Checked="OnLevelChecked"/>
-                    <RadioButton x:Name="LevelHigh"
-                                 Style="{StaticResource SmallChipRadioButton}"
-                                 GroupName="noiseLevel"
-                                 Content="高"
-                                 Margin="5,0,0,0"
-                                 Checked="OnLevelChecked"/>
-                </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <RadioButton x:Name="SceneCommuting"
-                                 Style="{StaticResource SmallChipRadioButton}"
-                                 GroupName="noiseScene"
-                                 Content="通勤"
-                                 Checked="OnSceneChecked"/>
-                    <RadioButton x:Name="SceneIndoor"
-                                 Style="{StaticResource SmallChipRadioButton}"
-                                 GroupName="noiseScene"
-                                 Content="室内"
-                                 Margin="5,0,0,0"
-                                 Checked="OnSceneChecked"/>
-                    <RadioButton x:Name="SceneAntiWind"
-                                 Style="{StaticResource SmallChipRadioButton}"
-                                 GroupName="noiseScene"
-                                 Content="抗风"
-                                 Margin="5,0,0,0"
-                                 Checked="OnSceneChecked"/>
-                </StackPanel>
+                <TextBlock Text="电量" Style="{StaticResource SectionLabel}" Margin="0"/>
+                <TextBlock x:Name="BatteryStateCaption"
+                           Grid.Column="1"
+                           Text="已连接"
+                           FontSize="{StaticResource Font/Size.Caption}"
+                           LineHeight="{StaticResource Font/Line.Caption}"
+                           Foreground="{StaticResource Brush/Success}"
+                           Visibility="Collapsed"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="BatteryTextBlock"
+                           Grid.Row="1"
+                           Text="--"
+                           FontSize="{StaticResource Font/Size.Display}"
+                           LineHeight="{StaticResource Font/Line.Display}"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource Brush/Text.Primary}"/>
             </Grid>
 
-            <!-- 5. 均衡器：预设 chips（自定义 = 打开编辑器） -->
-            <TextBlock Text="均衡器" Style="{StaticResource SectionLabel}"/>
-            <WrapPanel>
-                <RadioButton x:Name="EqPresetDefault"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="默认"
-                             Tag="1"
-                             Checked="OnEqPresetChecked"/>
-                <RadioButton x:Name="EqPresetPop"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="流行"
-                             Tag="2"
-                             Checked="OnEqPresetChecked"/>
-                <RadioButton x:Name="EqPresetHeavyBass"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="重低音"
-                             Tag="3"
-                             Checked="OnEqPresetChecked"/>
-                <RadioButton x:Name="EqPresetRock"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="摇滚"
-                             Tag="4"
-                             Checked="OnEqPresetChecked"/>
-                <RadioButton x:Name="EqPresetSoft"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="柔和"
-                             Tag="5"
-                             Checked="OnEqPresetChecked"/>
-                <RadioButton x:Name="EqPresetClassic"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="古典"
-                             Tag="6"
-                             Checked="OnEqPresetChecked"/>
-                <RadioButton x:Name="EqCustomChip"
-                             Style="{StaticResource ChipRadioButton}"
-                             GroupName="eqPreset"
-                             Content="自定义"
-                             Checked="OnEqCustomChecked"/>
-            </WrapPanel>
+            <!-- 5. 噪声控制：四段分段（选中滑块动画在代码层）+ 等级/场景子行 -->
+            <StackPanel x:Name="NoiseSection" Margin="{StaticResource Spacing/Block}">
+                <StackPanel.Style>
+                    <Style TargetType="{x:Type StackPanel}">
+                        <Style.Triggers>
+                            <!-- validity≠Available 或非连接态：禁用并降透明度 -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="{StaticResource Opacity/Disabled}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="噪声控制" Style="{StaticResource SectionLabel}"/>
+                <Border Height="{StaticResource Size/Segment.TrackHeight}"
+                        CornerRadius="{StaticResource CornerRadius/Control}"
+                        Background="{StaticResource Brush/Segment.Track}"
+                        ClipToBounds="True">
+                    <Grid>
+                        <Border x:Name="NoiseThumb"
+                                Width="56"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                Margin="{StaticResource Spacing/Segment.ThumbInset}"
+                                CornerRadius="{StaticResource CornerRadius/Small}"
+                                Background="{StaticResource Brush/Segment.Thumb}"
+                                IsHitTestVisible="False">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="NoiseThumbShift"/>
+                            </Border.RenderTransform>
+                        </Border>
+                        <Grid x:Name="NoiseSegmentGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <RadioButton x:Name="SegOff"
+                                         Style="{StaticResource SegmentRadioButton}"
+                                         GroupName="noiseSegment"
+                                         Content="关闭"
+                                         Checked="OnSegmentChecked"/>
+                            <RadioButton x:Name="SegTransparency"
+                                         Grid.Column="1"
+                                         Style="{StaticResource SegmentRadioButton}"
+                                         GroupName="noiseSegment"
+                                         Content="通透"
+                                         Checked="OnSegmentChecked"/>
+                            <RadioButton x:Name="SegNoiseCancelling"
+                                         Grid.Column="2"
+                                         Style="{StaticResource SegmentRadioButton}"
+                                         GroupName="noiseSegment"
+                                         Content="降噪"
+                                         Checked="OnSegmentChecked"/>
+                            <RadioButton x:Name="SegAdaptive"
+                                         Grid.Column="3"
+                                         Style="{StaticResource SegmentRadioButton}"
+                                         GroupName="noiseSegment"
+                                         Content="自适应"
+                                         Checked="OnSegmentChecked"/>
+                        </Grid>
+                    </Grid>
+                </Border>
 
-            <!-- 6. 游戏模式 -->
-            <Grid Margin="0,12,0,0">
+                <!-- 5b. 降噪子行：等级（低/中/高）+ 场景（通勤/室内/抗风） -->
+                <Grid x:Name="NoiseSubRow" Margin="{StaticResource Spacing/Block.Small}" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="LevelLow"
+                                     Style="{StaticResource PresetChipSmall}"
+                                     GroupName="noiseLevel"
+                                     Content="低"
+                                     Checked="OnLevelChecked"/>
+                        <RadioButton x:Name="LevelMedium"
+                                     Style="{StaticResource PresetChipSmall}"
+                                     GroupName="noiseLevel"
+                                     Content="中"
+                                     Margin="{StaticResource Spacing/Gap}"
+                                     Checked="OnLevelChecked"/>
+                        <RadioButton x:Name="LevelHigh"
+                                     Style="{StaticResource PresetChipSmall}"
+                                     GroupName="noiseLevel"
+                                     Content="高"
+                                     Margin="{StaticResource Spacing/Gap}"
+                                     Checked="OnLevelChecked"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <RadioButton x:Name="SceneCommuting"
+                                     Style="{StaticResource PresetChipSmall}"
+                                     GroupName="noiseScene"
+                                     Content="通勤"
+                                     Checked="OnSceneChecked"/>
+                        <RadioButton x:Name="SceneIndoor"
+                                     Style="{StaticResource PresetChipSmall}"
+                                     GroupName="noiseScene"
+                                     Content="室内"
+                                     Margin="{StaticResource Spacing/Gap}"
+                                     Checked="OnSceneChecked"/>
+                        <RadioButton x:Name="SceneAntiWind"
+                                     Style="{StaticResource PresetChipSmall}"
+                                     GroupName="noiseScene"
+                                     Content="抗风"
+                                     Margin="{StaticResource Spacing/Gap}"
+                                     Checked="OnSceneChecked"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <!-- 6. 均衡器：等宽 chips 两行（4+3）；自定义 = 打开 EQ 编辑窗（3b 重做窗口本身） -->
+            <StackPanel Margin="{StaticResource Spacing/Block}">
+                <TextBlock Text="均衡器" Style="{StaticResource SectionLabel}"/>
+                <WrapPanel x:Name="EqChipsPanel" ItemWidth="{StaticResource Size/EqChip.Width}">
+                    <WrapPanel.Style>
+                        <Style TargetType="{x:Type WrapPanel}">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="{StaticResource Opacity/Disabled}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </WrapPanel.Style>
+                    <RadioButton x:Name="EqPresetDefault"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="默认"
+                                 Tag="1"
+                                 Checked="OnEqPresetChecked"/>
+                    <RadioButton x:Name="EqPresetPop"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="流行"
+                                 Tag="2"
+                                 Checked="OnEqPresetChecked"/>
+                    <RadioButton x:Name="EqPresetHeavyBass"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="重低音"
+                                 Tag="3"
+                                 Checked="OnEqPresetChecked"/>
+                    <RadioButton x:Name="EqPresetRock"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="摇滚"
+                                 Tag="4"
+                                 Checked="OnEqPresetChecked"/>
+                    <RadioButton x:Name="EqPresetSoft"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="柔和"
+                                 Tag="5"
+                                 Checked="OnEqPresetChecked"/>
+                    <RadioButton x:Name="EqPresetClassic"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="古典"
+                                 Tag="6"
+                                 Checked="OnEqPresetChecked"/>
+                    <RadioButton x:Name="EqCustomChip"
+                                 Style="{StaticResource PresetChip}"
+                                 GroupName="eqPreset"
+                                 Content="自定义"
+                                 Checked="OnEqCustomChecked"/>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- 7. 游戏模式：行 + 开关（validity≠Available 禁用并降透明度） -->
+            <Grid x:Name="GameModeRow" Margin="{StaticResource Spacing/Block}">
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="{StaticResource Opacity/Disabled}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
                 <TextBlock Text="游戏模式"
-                           FontSize="12"
-                           Foreground="#333333"
+                           FontSize="{StaticResource Font/Size.Body}"
+                           Foreground="{StaticResource Brush/Text.Primary}"
                            VerticalAlignment="Center"/>
                 <ToggleButton x:Name="GameModeSwitch"
                               Style="{StaticResource SwitchToggleButton}"
@@ -233,12 +309,26 @@
                               Unchecked="OnGameModeChanged"/>
             </Grid>
 
-            <!-- 7. 页脚：设置齿轮（开机自启 √ / 关于） -->
-            <Grid Margin="0,12,0,0">
+            <!-- 8. 页脚：控制中心（3b 创建窗口，当前点击提示开发中）+ 设置齿轮（菜单保留） -->
+            <Grid Margin="{StaticResource Spacing/Block}">
+                <Button x:Name="ControlCenterButton"
+                        Style="{StaticResource IconButton}"
+                        HorizontalAlignment="Left"
+                        ToolTip="打开完整控制中心"
+                        Click="OnControlCenterClick">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource Font/Icon}" Text="&#xE80F;"
+                                   FontSize="{StaticResource Font/Size.Body}" VerticalAlignment="Center"/>
+                        <TextBlock Text="控制中心"
+                                   FontSize="{StaticResource Font/Size.Caption}"
+                                   Margin="{StaticResource Spacing/Gap}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
                 <Button x:Name="SettingsButton"
                         Style="{StaticResource IconButton}"
-                        Content="⚙ 设置"
                         HorizontalAlignment="Right"
+                        ToolTip="设置"
                         Click="OnSettingsClick">
                     <Button.ContextMenu>
                         <ContextMenu>
@@ -249,6 +339,14 @@
                             <MenuItem Header="关于" Click="OnAboutClick"/>
                         </ContextMenu>
                     </Button.ContextMenu>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource Font/Icon}" Text="&#xE713;"
+                                   FontSize="{StaticResource Font/Size.Body}" VerticalAlignment="Center"/>
+                        <TextBlock Text="设置"
+                                   FontSize="{StaticResource Font/Size.Caption}"
+                                   Margin="{StaticResource Spacing/Gap}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
                 </Button>
             </Grid>
 

@@ -483,6 +483,93 @@ public sealed class H3Client : IDisposable
         return null;
     }
 
+    // ───────────────────────── 阶段 4a：扩展功能（自动关机 / 按键映射 / 通用读） ─────────────────────────
+
+    /// <summary>
+    /// 自动关机（电源管理，cmd 0x14）读：CUSTOM <c>FE 01 14</c>，按 <see cref="PowerManager.ParseResponse"/>
+    /// 解出「配置时长 + 当前计时」（两段 u16LE 分钟）。null = 设备未应答 / 回声不符 / 数据不足 4B。
+    /// 出处：Quicky ParsePowerManager + qcy-h3s 真机与本机一致的 <c>14 04 FF FF 00 00</c>。
+    /// </summary>
+    public async Task<PowerManagerInfo?> GetPowerManagerAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        var response = await SendCustomReadAsync(PowerManager.Cmd, timeout, cancellationToken).ConfigureAwait(false);
+        return response is null ? null : PowerManager.ParseResponse(response.Params);
+    }
+
+    /// <summary>
+    /// 自动关机（cmd 0x14）写：<c>14 04 [timeLo][timeHi][curLo][curHi]</c>（u16LE 分钟；
+    /// 0xFFFF = 不自动关机）。出处：Quicky NewBookingRebootCommand、qcy-h3s set_power_manager。
+    /// </summary>
+    public Task<Packet?> SetPowerManagerAsync(int powerOffMinutes, int currentMinutes = 0,
+        TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        return SendAsync(new Packet(OpCode.Custom, parameters: PowerManager.BuildWritePayload(powerOffMinutes, currentMinutes)),
+            timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 按键映射表读：GET_ADV_INFO 掩码 <c>1 &lt;&lt; 2</c>（<see cref="AdvType.KeySettings"/>），
+    /// TLV type=2 值按 <see cref="KeyMap.ParseAdvInfoValue"/> 解为 [keyNum, action, function] 三元组。
+    /// null = 设备未应答 / 无 type=2 TLV / 无完整三元组。0x2B 旧通道读不通（BOTOES.md 实测），勿用。
+    /// </summary>
+    public async Task<List<KeyMappingEntry>?> GetKeyMappingsAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        var packet = await GetAdvInfoAsync(1u << AdvType.KeySettings, timeout, cancellationToken).ConfigureAwait(false);
+        if (packet is null)
+        {
+            return null;
+        }
+        foreach (var entry in TlvParser.Parse(packet.Params))
+        {
+            if (entry.Type == AdvType.KeySettings)
+            {
+                return KeyMap.ParseAdvInfoValue(entry.Value);
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 按键映射表写：SET_ADV_INFO（0xC0）LTV <c>[len=1+3N][0x02][三元组 × N]</c>。
+    /// <b>必须整表写入</b>（SDK 把载荷当完整配置；部分列表会清掉其余按键——BOTOES.md 实测与 APK 反编译结论）。
+    /// UI 接线（阶段 4b）请先 <see cref="GetKeyMappingsAsync"/> 取整表、改一条后回写。
+    /// </summary>
+    public Task<Packet?> SetKeyMappingsAsync(IReadOnlyList<KeyMappingEntry> entries,
+        TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        return SendAsync(new Packet(OpCode.SetAdvInfo, parameters: KeyMap.BuildSetAdvInfoPayload(entries)),
+            timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 通用 CUSTOM「Request Data」读：<c>FE 01 &lt;cmd&gt;</c>，返回原始回包（含 [cmd][len][data] 载荷）。
+    /// 探针命令（提示音音量 0x1D / 双设备 0x24 等）共用，sn 匹配走既有通道。
+    /// </summary>
+    public Task<Packet?> SendCustomReadAsync(byte cmdId, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        return SendAsync(new Packet(OpCode.Custom, parameters: [0xFE, 0x01, cmdId]), timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 播放提示音（CUSTOM <c>3D 01 &lt;toneID&gt;</c>，Quicky TonePlay.go）：写 + ack 判定，
+    /// 无回读通道。null = 设备无应答（命令可能未生效）。R2 级外放音效，调用方须先经 UI 确认。
+    /// </summary>
+    public Task<Packet?> PlayToneAsync(byte toneId, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        return SendAsync(new Packet(OpCode.Custom, parameters: ToneCommands.BuildPlayTonePayload(toneId)),
+            timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 查找耳机（CUSTOM <c>4B 01 01</c>，qcy-h3s find_earphones）：写 + ack 判定，无回读通道。
+    /// null = 设备无应答。R2 级外放音效（当前音量响铃），调用方须先经 UI 确认。
+    /// </summary>
+    public Task<Packet?> FindEarbudsAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        return SendAsync(new Packet(OpCode.Custom, parameters: ToneCommands.BuildFindEarbudsPayload()),
+            timeout, cancellationToken);
+    }
+
     public void Dispose()
     {
         _link.DataReceived -= HandleDataReceived;

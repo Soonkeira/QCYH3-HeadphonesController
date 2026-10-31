@@ -6,10 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <Version>0.3.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
     <AssemblyTitle>QCY H3 托盘控制工具</AssemblyTitle>
     <Product>QcyH3Tray</Product>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 应用图标同时作为窗口 Icon（AppIconSource 经 pack URI 加载；ico 由 tools/IconGen 生成） -->
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.3.2" />

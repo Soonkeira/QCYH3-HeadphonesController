@@ -1,0 +1,195 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!--
+      ══════════════════════════════════════════════════════════════════
+      Design Tokens（阶段 3a，plan.md P1-1 #1）
+      - 全部视觉常量的唯一来源：Styles.xaml 与各窗口只允许引用这里的键，
+        不得散落硬编码色值 / 字号 / 间距 / 圆角（含 3b 的控制中心）。
+      - 键名按语义分层：Color/*（原始值）→ Brush/*（语义画刷）→ Font/* / Spacing/* /
+        CornerRadius/* / Size/*（度量）。深色主题实现（阶段后期）只需按同键名
+        换一套值合并覆盖，控件层零改动。
+      - 本文件必须最先合并进 App.xaml（后续字典的 StaticResource 依赖合并顺序）。
+      ══════════════════════════════════════════════════════════════════
+    -->
+
+    <!-- ═══════════════ 颜色（原始值） ═══════════════ -->
+    <!-- 文本四级：主 / 次 / 弱 / 禁用 -->
+    <Color x:Key="Color/Text.Primary">#1F1F1F</Color>
+    <Color x:Key="Color/Text.Secondary">#555555</Color>
+    <Color x:Key="Color/Text.Tertiary">#8A8A8A</Color>
+    <Color x:Key="Color/Text.Disabled">#B0B3B8</Color>
+    <!-- 选中深底（Accent）之上的前景 -->
+    <Color x:Key="Color/Text.OnAccent">#FFFFFF</Color>
+
+    <!-- 表面三级：页面底（近纯白）/ 卡片白 / 弱化面（分段轨道、chip 底）+ 状态面 -->
+    <Color x:Key="Color/Surface">#F6F7F9</Color>
+    <Color x:Key="Color/Surface.Card">#FFFFFF</Color>
+    <Color x:Key="Color/Surface.Subtle">#F0F1F4</Color>
+    <Color x:Key="Color/Surface.Hover">#E7E9EE</Color>
+    <Color x:Key="Color/Surface.Pressed">#E0E3E8</Color>
+
+    <!-- 细边框（Fluent 观感的发丝线） -->
+    <Color x:Key="Color/Border.Subtle">#E6E8EC</Color>
+
+    <!-- 主色：稳重蓝 #2563EB（Fluent 中性蓝，避免与电量/状态绿绿冲突；2026-10-31 定） -->
+    <Color x:Key="Color/Accent">#2563EB</Color>
+    <Color x:Key="Color/Accent.Hover">#1D4ED8</Color>
+    <Color x:Key="Color/Accent.Pressed">#1E40AF</Color>
+
+    <!-- 语义状态色（Success 与托盘电量 >50% 绿保持一致） -->
+    <Color x:Key="Color/Success">#2E7D32</Color>
+    <Color x:Key="Color/Warning">#B45309</Color>
+    <Color x:Key="Color/Danger">#D32F2F</Color>
+    <Color x:Key="Color/Danger.Subtle">#1AD32F2F</Color>
+    <Color x:Key="Color/Danger.Border">#2ED32F2F</Color>
+
+    <!-- 分段控件：轨道 / 选中滑块 -->
+    <Color x:Key="Color/Segment.Track">#EEEFF2</Color>
+    <Color x:Key="Color/Segment.Thumb">#2563EB</Color>
+
+    <!-- 开关：关 / 开 / 禁用轨道 -->
+    <Color x:Key="Color/Switch.Track.Off">#D8DADE</Color>
+    <Color x:Key="Color/Switch.Track.On">#2563EB</Color>
+    <Color x:Key="Color/Switch.Track.Disabled">#E7E8EA</Color>
+
+    <!-- ═══════════════ 画刷（语义） ═══════════════ -->
+    <SolidColorBrush x:Key="Brush/Text.Primary" Color="{StaticResource Color/Text.Primary}"/>
+    <SolidColorBrush x:Key="Brush/Text.Secondary" Color="{StaticResource Color/Text.Secondary}"/>
+    <SolidColorBrush x:Key="Brush/Text.Tertiary" Color="{StaticResource Color/Text.Tertiary}"/>
+    <SolidColorBrush x:Key="Brush/Text.Disabled" Color="{StaticResource Color/Text.Disabled}"/>
+    <SolidColorBrush x:Key="Brush/Text.OnAccent" Color="{StaticResource Color/Text.OnAccent}"/>
+
+    <SolidColorBrush x:Key="Brush/Surface" Color="{StaticResource Color/Surface}"/>
+    <SolidColorBrush x:Key="Brush/Surface.Card" Color="{StaticResource Color/Surface.Card}"/>
+    <SolidColorBrush x:Key="Brush/Surface.Subtle" Color="{StaticResource Color/Surface.Subtle}"/>
+    <SolidColorBrush x:Key="Brush/Surface.Hover" Color="{StaticResource Color/Surface.Hover}"/>
+    <SolidColorBrush x:Key="Brush/Surface.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
+    <SolidColorBrush x:Key="Brush/Border.Subtle" Color="{StaticResource Color/Border.Subtle}"/>
+
+    <SolidColorBrush x:Key="Brush/Accent" Color="{StaticResource Color/Accent}"/>
+    <SolidColorBrush x:Key="Brush/Accent.Hover" Color="{StaticResource Color/Accent.Hover}"/>
+    <SolidColorBrush x:Key="Brush/Accent.Pressed" Color="{StaticResource Color/Accent.Pressed}"/>
+
+    <SolidColorBrush x:Key="Brush/Success" Color="{StaticResource Color/Success}"/>
+    <SolidColorBrush x:Key="Brush/Warning" Color="{StaticResource Color/Warning}"/>
+    <SolidColorBrush x:Key="Brush/Danger" Color="{StaticResource Color/Danger}"/>
+
+    <SolidColorBrush x:Key="Brush/Segment.Track" Color="{StaticResource Color/Segment.Track}"/>
+    <SolidColorBrush x:Key="Brush/Segment.Thumb" Color="{StaticResource Color/Segment.Thumb}"/>
+
+    <SolidColorBrush x:Key="Brush/Switch.Track.Off" Color="{StaticResource Color/Switch.Track.Off}"/>
+    <SolidColorBrush x:Key="Brush/Switch.Track.On" Color="{StaticResource Color/Switch.Track.On}"/>
+    <SolidColorBrush x:Key="Brush/Switch.Track.Disabled" Color="{StaticResource Color/Switch.Track.Disabled}"/>
+    <SolidColorBrush x:Key="Brush/Switch.Thumb" Color="{StaticResource Color/Text.OnAccent}"/>
+
+    <!--
+      可交互控件的状态画刷（Normal / Hover / Pressed / Checked / Disabled）。
+      模板里通过触发器切换；Checked 深底一律配 Brush/Text.OnAccent 白字（D2 类问题的展示保证）。
+    -->
+    <!-- chip（EQ 预设等圆角胶囊） -->
+    <SolidColorBrush x:Key="Brush/Chip.Background" Color="{StaticResource Color/Surface.Subtle}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Background.Hover" Color="{StaticResource Color/Surface.Hover}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Background.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Background.Checked" Color="{StaticResource Color/Accent}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Background.Disabled" Color="{StaticResource Color/Surface.Subtle}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Foreground" Color="{StaticResource Color/Text.Secondary}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Foreground.Hover" Color="{StaticResource Color/Text.Primary}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Foreground.Checked" Color="{StaticResource Color/Text.OnAccent}"/>
+    <SolidColorBrush x:Key="Brush/Chip.Foreground.Disabled" Color="{StaticResource Color/Text.Disabled}"/>
+
+    <!-- 分段控件单段（文字层；底色由窗口层滑块提供） -->
+    <SolidColorBrush x:Key="Brush/Segment.Foreground" Color="{StaticResource Color/Text.Secondary}"/>
+    <SolidColorBrush x:Key="Brush/Segment.Foreground.Hover" Color="{StaticResource Color/Text.Primary}"/>
+    <SolidColorBrush x:Key="Brush/Segment.Foreground.Checked" Color="{StaticResource Color/Text.OnAccent}"/>
+    <SolidColorBrush x:Key="Brush/Segment.Foreground.Disabled" Color="{StaticResource Color/Text.Disabled}"/>
+
+    <!-- 幽灵按钮（↻ / ⚙ / 控制中心 / 设置） -->
+    <SolidColorBrush x:Key="Brush/Ghost.Background.Hover" Color="{StaticResource Color/Surface.Hover}"/>
+    <SolidColorBrush x:Key="Brush/Ghost.Background.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
+    <SolidColorBrush x:Key="Brush/Ghost.Foreground" Color="{StaticResource Color/Text.Secondary}"/>
+    <SolidColorBrush x:Key="Brush/Ghost.Foreground.Hover" Color="{StaticResource Color/Text.Primary}"/>
+    <SolidColorBrush x:Key="Brush/Ghost.Foreground.Disabled" Color="{StaticResource Color/Text.Disabled}"/>
+
+    <!-- 降级横幅（Danger 浅底） -->
+    <SolidColorBrush x:Key="Brush/Banner.Danger.Background" Color="{StaticResource Color/Danger.Subtle}"/>
+    <SolidColorBrush x:Key="Brush/Banner.Danger.Border" Color="{StaticResource Color/Danger.Border}"/>
+    <SolidColorBrush x:Key="Brush/Banner.Danger.Foreground" Color="{StaticResource Color/Danger}"/>
+
+    <!-- ═══════════════ 排版 ═══════════════ -->
+    <!--
+      D2 根治之一：显式 CJK 安全字族栈。Microsoft YaHei UI 在前 → CJK 字形与
+      拉丁字形都以雅黑度量参与测量（此前按 Segoe UI 度量、按雅黑回退渲染，
+      5px padding + 负 margin 吃掉余量后"重低音"被拦腰裁切）。
+    -->
+    <FontFamily x:Key="Font/Primary">Microsoft YaHei UI, Segoe UI</FontFamily>
+    <!-- Segoe Fluent Icons（Win11）回退 MDL2（Win10） -->
+    <FontFamily x:Key="Font/Icon">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+    <sys:Double x:Key="Font/Size.Caption">11</sys:Double>
+    <sys:Double x:Key="Font/Size.Body">12.5</sys:Double>
+    <sys:Double x:Key="Font/Size.Subtitle">14</sys:Double>
+    <sys:Double x:Key="Font/Size.Title">18</sys:Double>
+    <sys:Double x:Key="Font/Size.Display">22</sys:Double>
+
+    <!-- 行高：只允许应用于单行文本且必须大于对应字号的雅黑自然行高（防裁切），多行文本禁用 -->
+    <sys:Double x:Key="Font/Line.Caption">16</sys:Double>
+    <sys:Double x:Key="Font/Line.Body">18</sys:Double>
+    <sys:Double x:Key="Font/Line.Subtitle">20</sys:Double>
+    <sys:Double x:Key="Font/Line.Title">26</sys:Double>
+    <sys:Double x:Key="Font/Line.Display">32</sys:Double>
+
+    <!-- ═══════════════ 间距 ═══════════════ -->
+    <sys:Double x:Key="Spacing/XS">4</sys:Double>
+    <sys:Double x:Key="Spacing/S">8</sys:Double>
+    <sys:Double x:Key="Spacing/M">12</sys:Double>
+    <sys:Double x:Key="Spacing/L">16</sys:Double>
+    <sys:Double x:Key="Spacing/XL">20</sys:Double>
+    <sys:Double x:Key="Spacing/XXL">24</sys:Double>
+
+    <!-- 复合间距（垂直节奏统一从这里取） -->
+    <Thickness x:Key="Spacing/Card.Padding">16</Thickness>
+    <Thickness x:Key="Spacing/Block">0,12,0,0</Thickness>
+    <Thickness x:Key="Spacing/Block.Small">0,8,0,0</Thickness>
+    <Thickness x:Key="Spacing/Chip">0,0,4,4</Thickness>
+    <Thickness x:Key="Spacing/Chip.Horizontal">0,0,4,0</Thickness>
+    <!-- 水平 6：等宽 EQ chip（ItemWidth 58 - 12 = 46 ≥ 三字中文 3×12.5=37.5，防裁切） -->
+    <Thickness x:Key="Spacing/Chip.Padding">6,6</Thickness>
+    <Thickness x:Key="Spacing/Chip.Small.Padding">9,6</Thickness>
+    <Thickness x:Key="Spacing/Gap">4,0,0,0</Thickness>
+    <Thickness x:Key="Spacing/Banner.Padding">10,7</Thickness>
+    <Thickness x:Key="Spacing/IconButton.Padding">6,2</Thickness>
+    <Thickness x:Key="Spacing/Label.Below">0,0,0,8</Thickness>
+    <Thickness x:Key="Spacing/Segment.ThumbInset">3,3,0,3</Thickness>
+    <Thickness x:Key="Spacing/Switch.ThumbInset">3,0,0,0</Thickness>
+    <!-- 阶段 3b：窗体标准按钮（控制中心 / EQ 编辑器） -->
+    <Thickness x:Key="Spacing/Button.Padding">14,7</Thickness>
+
+    <!-- ═══════════════ 圆角 ═══════════════ -->
+    <CornerRadius x:Key="CornerRadius/Card">16</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Control">9</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Chip">999</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Small">6</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Switch">10</CornerRadius>
+
+    <!-- ═══════════════ 尺寸 ═══════════════ -->
+    <sys:Double x:Key="Size/Chip.MinHeight">30</sys:Double>
+    <sys:Double x:Key="Size/Chip.MinWidth">44</sys:Double>
+    <sys:Double x:Key="Size/Chip.Small.MinHeight">26</sys:Double>
+    <sys:Double x:Key="Size/Chip.Small.MinWidth">28</sys:Double>
+    <sys:Double x:Key="Size/EqChip.Width">58</sys:Double>
+    <sys:Double x:Key="Size/Segment.TrackHeight">36</sys:Double>
+    <sys:Double x:Key="Size/Segment.MinHeight">30</sys:Double>
+    <sys:Double x:Key="Size/Switch.Width">36</sys:Double>
+    <sys:Double x:Key="Size/Switch.Height">20</sys:Double>
+    <sys:Double x:Key="Size/Switch.Thumb">14</sys:Double>
+    <sys:Double x:Key="Size/Switch.Travel">16</sys:Double>
+    <sys:Double x:Key="Size/Hero.Height">96</sys:Double>
+    <sys:Double x:Key="Size/Hero.Height.ControlCenter">128</sys:Double>
+    <sys:Double x:Key="Size/IconButton.MinSize">28</sys:Double>
+    <sys:Double x:Key="Size/Button.MinHeight">32</sys:Double>
+
+    <!-- 禁用态整体降透明度（validity≠Available 的项禁用并降透明度） -->
+    <sys:Double x:Key="Opacity/Disabled">0.45</sys:Double>
+</ResourceDictionary>

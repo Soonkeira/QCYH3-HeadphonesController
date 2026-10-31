@@ -1,0 +1,42 @@
+﻿WINDOW: QCY H3 控制中心 | 805,315,950,750
+[ControlType.Text] name='QCY H3' id='' enabled=True off=False rect=834,373,199,25
+[ControlType.Text] name='控制中心' id='' enabled=True off=False rect=834,398,199,20
+[ControlType.RadioButton] name='概览' id='NavOverview' enabled=True off=False selected=False rect=834,440,199,44
+[ControlType.Text] name='概览' id='' enabled=True off=False rect=876,451,35,22
+[ControlType.RadioButton] name='降噪' id='NavNoise' enabled=True off=False selected=True rect=834,490,199,44
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=876,501,35,22
+[ControlType.RadioButton] name='声音' id='NavSound' enabled=True off=False selected=False rect=834,538,199,44
+[ControlType.Text] name='声音' id='' enabled=True off=False rect=876,549,35,22
+[ControlType.RadioButton] name='功能' id='NavFeature' enabled=True off=False selected=False rect=834,588,199,44
+[ControlType.Text] name='功能' id='' enabled=True off=False rect=876,599,35,22
+[ControlType.RadioButton] name='连接' id='NavConnection' enabled=True off=False selected=False rect=834,636,199,44
+[ControlType.Text] name='连接' id='' enabled=True off=False rect=876,647,35,22
+[ControlType.RadioButton] name='设置' id='NavSettings' enabled=True off=False selected=False rect=834,686,199,44
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=876,697,35,22
+[ControlType.Pane] name='' id='' enabled=True off=False rect=1054,353,692,703
+[ControlType.Text] name='噪声控制' id='' enabled=True off=False rect=1084,378,632,33
+[ControlType.Text] name='模式' id='' enabled=True off=False rect=1105,447,590,17
+[ControlType.RadioButton] name='关闭' id='SegOff' enabled=True off=False selected=False rect=1105,474,148,55
+[ControlType.Text] name='关闭' id='' enabled=True off=False rect=1164,492,31,20
+[ControlType.RadioButton] name='通透' id='SegTransparency' enabled=True off=False selected=False rect=1253,474,148,55
+[ControlType.Text] name='通透' id='' enabled=True off=False rect=1312,492,31,20
+[ControlType.RadioButton] name='降噪' id='SegNoiseCancelling' enabled=True off=False selected=True rect=1401,474,147,55
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=1459,492,31,20
+[ControlType.RadioButton] name='自适应' id='SegAdaptive' enabled=True off=False selected=False rect=1548,474,147,55
+[ControlType.Text] name='自适应' id='' enabled=True off=False rect=1598,492,47,20
+[ControlType.Text] name='降噪档位' id='' enabled=True off=False rect=1105,544,590,17
+[ControlType.RadioButton] name='低' id='LevelLow' enabled=True off=False selected=False rect=1105,571,36,32
+[ControlType.Text] name='低' id='' enabled=True off=False rect=1116,579,14,17
+[ControlType.RadioButton] name='中' id='LevelMedium' enabled=True off=False selected=False rect=1151,571,36,32
+[ControlType.Text] name='中' id='' enabled=True off=False rect=1162,579,14,17
+[ControlType.RadioButton] name='高' id='LevelHigh' enabled=True off=False selected=True rect=1192,571,36,32
+[ControlType.Text] name='高' id='' enabled=True off=False rect=1203,579,14,17
+[ControlType.Text] name='场景模式（与降噪共享降噪段）' id='' enabled=True off=False rect=1105,616,590,17
+[ControlType.RadioButton] name='通勤' id='SceneCommuting' enabled=True off=False selected=False rect=1105,642,50,32
+[ControlType.Text] name='通勤' id='' enabled=True off=False rect=1116,650,28,17
+[ControlType.RadioButton] name='室内' id='SceneIndoor' enabled=True off=False selected=False rect=1165,642,50,32
+[ControlType.Text] name='室内' id='' enabled=True off=False rect=1176,650,28,17
+[ControlType.RadioButton] name='抗风' id='SceneAntiWind' enabled=True off=False selected=False rect=1220,642,50,32
+[ControlType.Text] name='抗风' id='' enabled=True off=False rect=1231,650,28,17
+[ControlType.Text] name='降噪：过滤持续性低频噪声，可调低/中/高三档。' id='NoiseDescribeText' enabled=True off=False rect=1105,689,590,17
+

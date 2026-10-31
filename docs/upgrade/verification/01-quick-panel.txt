@@ -1,0 +1,52 @@
+﻿WINDOW: QCY H3 | 2170,713,375,637
+[ControlType.Text] name='QCY H3' id='' enabled=True off=False rect=2200,743,274,25
+[ControlType.Text] name='已连接' id='StatusTextBlock' enabled=True off=False rect=2474,745,41,20
+[ControlType.Image] name='' id='HeadphoneHeroImage' enabled=True off=False rect=2308,778,99,120
+[ControlType.Text] name='电量' id='' enabled=True off=False rect=2200,913,274,20
+[ControlType.Text] name='已连接' id='BatteryStateCaption' enabled=True off=False rect=2474,913,41,20
+[ControlType.Text] name='50%' id='BatteryTextBlock' enabled=True off=False rect=2200,933,274,40
+[ControlType.Text] name='噪声控制' id='' enabled=True off=False rect=2200,988,315,17
+[ControlType.RadioButton] name='关闭' id='SegOff' enabled=True off=False selected=False rect=2200,1015,79,45
+[ControlType.Text] name='关闭' id='' enabled=True off=False rect=2224,1027,31,20
+[ControlType.RadioButton] name='通透' id='SegTransparency' enabled=True off=False selected=False rect=2279,1015,79,45
+[ControlType.Text] name='通透' id='' enabled=True off=False rect=2303,1027,31,20
+[ControlType.RadioButton] name='降噪' id='SegNoiseCancelling' enabled=True off=False selected=True rect=2358,1015,79,45
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=2382,1027,31,20
+[ControlType.RadioButton] name='自适应' id='SegAdaptive' enabled=True off=False selected=False rect=2437,1015,78,45
+[ControlType.Text] name='自适应' id='' enabled=True off=False rect=2452,1027,47,20
+[ControlType.RadioButton] name='低' id='LevelLow' enabled=True off=False selected=False rect=2200,1070,36,32
+[ControlType.Text] name='低' id='' enabled=True off=False rect=2211,1078,14,17
+[ControlType.RadioButton] name='中' id='LevelMedium' enabled=True off=False selected=False rect=2246,1070,36,32
+[ControlType.Text] name='中' id='' enabled=True off=False rect=2257,1078,14,17
+[ControlType.RadioButton] name='高' id='LevelHigh' enabled=True off=False selected=True rect=2287,1070,36,32
+[ControlType.Text] name='高' id='' enabled=True off=False rect=2298,1078,14,17
+[ControlType.RadioButton] name='通勤' id='SceneCommuting' enabled=True off=False selected=False rect=2350,1070,50,32
+[ControlType.Text] name='通勤' id='' enabled=True off=False rect=2361,1078,28,17
+[ControlType.RadioButton] name='室内' id='SceneIndoor' enabled=True off=False selected=False rect=2410,1070,50,32
+[ControlType.Text] name='室内' id='' enabled=True off=False rect=2421,1078,28,17
+[ControlType.RadioButton] name='抗风' id='SceneAntiWind' enabled=True off=False selected=False rect=2465,1070,50,32
+[ControlType.Text] name='抗风' id='' enabled=True off=False rect=2476,1078,28,17
+[ControlType.Text] name='均衡器' id='' enabled=True off=False rect=2200,1117,315,17
+[ControlType.RadioButton] name='默认' id='EqPresetDefault' enabled=True off=False selected=False rect=2200,1144,67,38
+[ControlType.Text] name='默认' id='' enabled=True off=False rect=2218,1153,31,20
+[ControlType.RadioButton] name='流行' id='EqPresetPop' enabled=True off=False selected=False rect=2272,1144,67,38
+[ControlType.Text] name='流行' id='' enabled=True off=False rect=2290,1153,31,20
+[ControlType.RadioButton] name='重低音' id='EqPresetHeavyBass' enabled=True off=False selected=True rect=2345,1144,67,38
+[ControlType.Text] name='重低音' id='' enabled=True off=False rect=2355,1153,47,20
+[ControlType.RadioButton] name='摇滚' id='EqPresetRock' enabled=True off=False selected=False rect=2418,1144,67,38
+[ControlType.Text] name='摇滚' id='' enabled=True off=False rect=2436,1153,31,20
+[ControlType.RadioButton] name='柔和' id='EqPresetSoft' enabled=True off=False selected=False rect=2200,1187,67,38
+[ControlType.Text] name='柔和' id='' enabled=True off=False rect=2218,1196,31,20
+[ControlType.RadioButton] name='古典' id='EqPresetClassic' enabled=True off=False selected=False rect=2272,1187,67,38
+[ControlType.Text] name='古典' id='' enabled=True off=False rect=2290,1196,31,20
+[ControlType.RadioButton] name='自定义' id='EqCustomChip' enabled=True off=False selected=False rect=2345,1187,67,38
+[ControlType.Text] name='自定义' id='' enabled=True off=False rect=2355,1196,47,20
+[ControlType.Text] name='游戏模式' id='' enabled=True off=False rect=2200,1247,315,20
+[ControlType.Button] name='' id='GameModeSwitch' enabled=True off=False toggle=Off rect=2470,1245,45,25
+[ControlType.Button] name='' id='ControlCenterButton' enabled=True off=False rect=2200,1285,91,35
+[ControlType.Text] name='' id='' enabled=True off=False rect=2208,1293,16,16
+[ControlType.Text] name='控制中心' id='' enabled=True off=False rect=2229,1293,55,17
+[ControlType.Button] name='' id='SettingsButton' enabled=True off=False rect=2452,1285,63,35
+[ControlType.Text] name='' id='' enabled=True off=False rect=2460,1293,16,16
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=2481,1293,27,17
+

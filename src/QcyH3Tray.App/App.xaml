@@ -5,7 +5,15 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!--
+                  合并顺序即解析顺序：Tokens 必须最先（Styles 与各窗口的
+                  StaticResource 依赖它）；HeadphoneArt 不被其它字典引用，按约定
+                  合并在尾部。约定：Resources/Tokens.xaml = 视觉常量；
+                  Resources/Styles.xaml = 控件模板；Resources/HeadphoneArt.xaml = 产品视觉。
+                -->
+                <ResourceDictionary Source="Resources/Tokens.xaml"/>
                 <ResourceDictionary Source="Resources/Styles.xaml"/>
+                <ResourceDictionary Source="Resources/HeadphoneArt.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

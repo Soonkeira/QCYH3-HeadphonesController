@@ -1,0 +1,33 @@
+﻿WINDOW: QCY H3 控制中心 | 805,315,950,750
+[ControlType.Text] name='QCY H3' id='' enabled=True off=False rect=834,373,199,25
+[ControlType.Text] name='控制中心' id='' enabled=True off=False rect=834,398,199,20
+[ControlType.RadioButton] name='概览' id='NavOverview' enabled=True off=False selected=True rect=834,440,199,44
+[ControlType.Text] name='概览' id='' enabled=True off=False rect=876,451,35,22
+[ControlType.RadioButton] name='降噪' id='NavNoise' enabled=True off=False selected=False rect=834,490,199,44
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=876,501,35,22
+[ControlType.RadioButton] name='声音' id='NavSound' enabled=True off=False selected=False rect=834,538,199,44
+[ControlType.Text] name='声音' id='' enabled=True off=False rect=876,549,35,22
+[ControlType.RadioButton] name='功能' id='NavFeature' enabled=True off=False selected=False rect=834,588,199,44
+[ControlType.Text] name='功能' id='' enabled=True off=False rect=876,599,35,22
+[ControlType.RadioButton] name='连接' id='NavConnection' enabled=True off=False selected=False rect=834,636,199,44
+[ControlType.Text] name='连接' id='' enabled=True off=False rect=876,647,35,22
+[ControlType.RadioButton] name='设置' id='NavSettings' enabled=True off=False selected=False rect=834,686,199,44
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=876,697,35,22
+[ControlType.Pane] name='' id='' enabled=True off=False rect=1054,353,692,703
+[ControlType.Text] name='概览' id='' enabled=True off=False rect=1084,378,632,33
+[ControlType.Image] name='' id='HeadphoneHeroImage' enabled=True off=False rect=1334,426,133,160
+[ControlType.Text] name='84:AC:60:FF:C1:2D' id='OverviewDeviceName' enabled=True off=False rect=1105,622,543,25
+[ControlType.Text] name='已连接' id='OverviewStatusText' enabled=True off=False rect=1648,623,47,22
+[ControlType.Text] name='电量' id='' enabled=True off=False rect=1105,662,295,17
+[ControlType.Text] name='50%' id='OverviewBatteryText' enabled=True off=False rect=1105,679,295,40
+[ControlType.Text] name='降噪模式' id='' enabled=True off=False rect=1400,662,295,17
+[ControlType.Text] name='降噪·高' id='OverviewNoiseModeText' enabled=True off=False rect=1400,679,295,40
+[ControlType.Separator] name='' id='' enabled=False off=False rect=1105,736,590,1
+[ControlType.Text] name='游戏模式' id='' enabled=True off=False rect=1105,755,590,22
+[ControlType.Text] name='开启后耳机进入低延迟模式（可能增加功耗）。' id='' enabled=True off=False rect=1105,779,590,17
+[ControlType.Button] name='' id='OverviewGameModeSwitch' enabled=True off=False toggle=Off rect=1650,763,45,25
+[ControlType.Button] name='立即重连' id='OverviewReconnectButton' enabled=True off=False rect=1105,816,99,40
+[ControlType.Text] name='立即重连' id='' enabled=True off=False rect=1123,826,62,20
+[ControlType.Button] name='断开' id='OverviewDisconnectButton' enabled=True off=False rect=1209,816,68,40
+[ControlType.Text] name='断开' id='' enabled=True off=False rect=1227,826,31,20
+

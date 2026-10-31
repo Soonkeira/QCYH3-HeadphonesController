@@ -209,6 +209,12 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# 自包含发布输出（publish.ps1）
+publish-selfcontained/
+
+# 发布产物（publish.ps1 组包输出：zip + 冒烟截图）
+dist/
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml

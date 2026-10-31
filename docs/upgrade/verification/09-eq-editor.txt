@@ -1,0 +1,85 @@
+﻿WINDOW: 均衡器编辑器 | 855,328,850,725
+[ControlType.Text] name='+12' id='' enabled=True off=False rect=1626,404,26,20
+[ControlType.Text] name='0' id='' enabled=True off=False rect=1644,430,8,20
+[ControlType.Text] name='-12' id='' enabled=True off=False rect=1630,454,22,20
+[ControlType.Text] name='总增益' id='' enabled=True off=False rect=886,644,787,22
+[ControlType.Text] name='0.0 dB' id='MasterGainText' enabled=True off=False rect=1626,644,47,22
+[ControlType.Slider] name='' id='MasterGainSlider' enabled=True off=False range=0 rect=886,674,787,22
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=886,674,382,22
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=1290,674,382,22
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1268,674,22,22
+[ControlType.Text] name='+5.0 dB' id='' enabled=True off=False rect=914,704,58,20
+[ControlType.Text] name='Q 0.40' id='' enabled=True off=False rect=921,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=5 rect=932,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=932,752,22,16
+[ControlType.Text] name='55' id='' enabled=True off=False rect=935,773,16,17
+[ControlType.Text] name='+4.0 dB' id='' enabled=True off=False rect=1027,704,58,20
+[ControlType.Text] name='Q 0.80' id='' enabled=True off=False rect=1034,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=4 rect=1045,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1045,752,22,16
+[ControlType.Text] name='220' id='' enabled=True off=False rect=1043,773,24,17
+[ControlType.Text] name='+2.0 dB' id='' enabled=True off=False rect=1139,704,58,20
+[ControlType.Text] name='Q 0.70' id='' enabled=True off=False rect=1146,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=2 rect=1157,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1157,752,22,16
+[ControlType.Text] name='500' id='' enabled=True off=False rect=1156,773,24,17
+[ControlType.Text] name='0.0 dB' id='' enabled=True off=False rect=1256,704,47,20
+[ControlType.Text] name='Q 1.00' id='' enabled=True off=False rect=1258,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=0 rect=1269,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1269,752,22,16
+[ControlType.Text] name='1k' id='' enabled=True off=False rect=1272,773,16,17
+[ControlType.Text] name='-1.0 dB' id='' enabled=True off=False rect=1366,704,53,20
+[ControlType.Text] name='Q 0.80' id='' enabled=True off=False rect=1371,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=-1 rect=1382,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1382,752,22,16
+[ControlType.Text] name='1.8k' id='' enabled=True off=False rect=1379,773,27,17
+[ControlType.Text] name='0.0 dB' id='' enabled=True off=False rect=1481,704,47,20
+[ControlType.Text] name='Q 1.30' id='' enabled=True off=False rect=1483,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=0 rect=1494,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1494,752,22,16
+[ControlType.Text] name='2.8k' id='' enabled=True off=False rect=1491,773,27,17
+[ControlType.Text] name='+1.0 dB' id='' enabled=True off=False rect=1588,704,58,20
+[ControlType.Text] name='Q 1.20' id='' enabled=True off=False rect=1595,725,43,17
+[ControlType.Slider] name='' id='' enabled=True off=False range=1 rect=1606,752,22,16
+[ControlType.Button] name='' id='DecreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Button] name='' id='IncreaseLarge' enabled=True off=False rect=Empty
+[ControlType.Thumb] name='' id='' enabled=True off=False rect=1606,752,22,16
+[ControlType.Text] name='7.5k' id='' enabled=True off=False rect=1603,773,27,17
+[ControlType.Button] name='读自耳机' id='ReadButton' enabled=True off=False rect=886,806,99,40
+[ControlType.Text] name='读自耳机' id='' enabled=True off=False rect=904,816,62,20
+[ControlType.Button] name='恢复耳机当前值' id='RestoreButton' enabled=True off=False rect=990,806,146,40
+[ControlType.Text] name='恢复耳机当前值' id='' enabled=True off=False rect=1008,816,109,20
+[ControlType.Button] name='重置为平线' id='ResetButton' enabled=True off=False rect=1141,806,115,40
+[ControlType.Text] name='重置为平线' id='' enabled=True off=False rect=1159,816,78,20
+[ControlType.Button] name='应用到耳机' id='ApplyButton' enabled=True off=False rect=1560,806,113,40
+[ControlType.Text] name='应用到耳机' id='' enabled=True off=False rect=1578,816,78,20
+[ControlType.Text] name='已读取耳机当前均衡器。' id='HintTextBlock' enabled=True off=False rect=886,858,787,17
+[ControlType.Text] name='本地配置' id='' enabled=True off=False rect=907,918,62,22
+[ControlType.ComboBox] name='' id='ProfileCombo' enabled=True off=False expand=Collapsed rect=974,915,292,27
+[ControlType.Button] name='加载' id='LoadProfileButton' enabled=False off=False rect=1266,909,68,40
+[ControlType.Text] name='加载' id='' enabled=False off=False rect=1284,919,31,20
+[ControlType.Button] name='覆盖' id='OverwriteProfileButton' enabled=False off=False rect=1339,909,68,40
+[ControlType.Text] name='覆盖' id='' enabled=False off=False rect=1357,919,31,20
+[ControlType.Button] name='删除' id='DeleteProfileButton' enabled=False off=False rect=1412,909,68,40
+[ControlType.Text] name='删除' id='' enabled=False off=False rect=1430,919,31,20
+[ControlType.Button] name='导入…' id='ImportProfileButton' enabled=True off=False rect=1485,909,81,40
+[ControlType.Text] name='导入…' id='' enabled=True off=False rect=1503,919,44,20
+[ControlType.Button] name='导出…' id='ExportProfileButton' enabled=True off=False rect=1571,909,81,40
+[ControlType.Text] name='导出…' id='' enabled=True off=False rect=1589,919,44,20
+[ControlType.Text] name='另存为' id='' enabled=True off=False rect=907,970,47,22
+[ControlType.Edit] name='' id='ProfileNameBox' enabled=True off=False value="" rect=959,961,625,40
+[ControlType.Button] name='保存' id='SaveProfileButton' enabled=True off=False rect=1584,961,68,40
+[ControlType.Text] name='保存' id='' enabled=True off=False rect=1602,971,31,20
+

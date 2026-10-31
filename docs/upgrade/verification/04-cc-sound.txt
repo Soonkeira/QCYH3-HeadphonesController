@@ -1,0 +1,38 @@
+﻿WINDOW: QCY H3 控制中心 | 805,315,950,750
+[ControlType.Text] name='QCY H3' id='' enabled=True off=False rect=834,373,199,25
+[ControlType.Text] name='控制中心' id='' enabled=True off=False rect=834,398,199,20
+[ControlType.RadioButton] name='概览' id='NavOverview' enabled=True off=False selected=False rect=834,440,199,44
+[ControlType.Text] name='概览' id='' enabled=True off=False rect=876,451,35,22
+[ControlType.RadioButton] name='降噪' id='NavNoise' enabled=True off=False selected=False rect=834,490,199,44
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=876,501,35,22
+[ControlType.RadioButton] name='声音' id='NavSound' enabled=True off=False selected=True rect=834,538,199,44
+[ControlType.Text] name='声音' id='' enabled=True off=False rect=876,549,35,22
+[ControlType.RadioButton] name='功能' id='NavFeature' enabled=True off=False selected=False rect=834,588,199,44
+[ControlType.Text] name='功能' id='' enabled=True off=False rect=876,599,35,22
+[ControlType.RadioButton] name='连接' id='NavConnection' enabled=True off=False selected=False rect=834,636,199,44
+[ControlType.Text] name='连接' id='' enabled=True off=False rect=876,647,35,22
+[ControlType.RadioButton] name='设置' id='NavSettings' enabled=True off=False selected=False rect=834,686,199,44
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=876,697,35,22
+[ControlType.Pane] name='' id='' enabled=True off=False rect=1054,353,692,703
+[ControlType.Text] name='声音' id='' enabled=True off=False rect=1084,378,632,33
+[ControlType.Text] name='均衡器预设' id='' enabled=True off=False rect=1105,447,590,17
+[ControlType.RadioButton] name='默认' id='EqPresetDefault' enabled=True off=False selected=False rect=1105,474,67,38
+[ControlType.Text] name='默认' id='' enabled=True off=False rect=1123,483,31,20
+[ControlType.RadioButton] name='流行' id='EqPresetPop' enabled=True off=False selected=False rect=1177,474,67,38
+[ControlType.Text] name='流行' id='' enabled=True off=False rect=1195,483,31,20
+[ControlType.RadioButton] name='重低音' id='EqPresetHeavyBass' enabled=True off=False selected=True rect=1250,474,67,38
+[ControlType.Text] name='重低音' id='' enabled=True off=False rect=1260,483,47,20
+[ControlType.RadioButton] name='摇滚' id='EqPresetRock' enabled=True off=False selected=False rect=1323,474,67,38
+[ControlType.Text] name='摇滚' id='' enabled=True off=False rect=1341,483,31,20
+[ControlType.RadioButton] name='柔和' id='EqPresetSoft' enabled=True off=False selected=False rect=1395,474,67,38
+[ControlType.Text] name='柔和' id='' enabled=True off=False rect=1413,483,31,20
+[ControlType.RadioButton] name='古典' id='EqPresetClassic' enabled=True off=False selected=False rect=1467,474,67,38
+[ControlType.Text] name='古典' id='' enabled=True off=False rect=1485,483,31,20
+[ControlType.RadioButton] name='自定义' id='EqCustomChip' enabled=True off=False selected=False rect=1540,474,67,38
+[ControlType.Text] name='自定义' id='' enabled=True off=False rect=1550,483,47,20
+[ControlType.Text] name='总增益（耳机当前值）' id='' enabled=True off=False rect=1105,535,590,17
+[ControlType.Text] name='0.0 dB' id='EqMasterGainText' enabled=True off=False rect=1105,552,590,40
+[ControlType.Button] name='' id='OpenEqEditorButton' enabled=True off=False rect=1514,552,181,40
+[ControlType.Text] name='' id='' enabled=True off=False rect=1532,564,16,16
+[ControlType.Text] name='打开均衡器编辑器' id='' enabled=True off=False rect=1553,562,125,20
+

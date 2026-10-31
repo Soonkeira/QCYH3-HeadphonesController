@@ -1,0 +1,51 @@
+﻿WINDOW: QCY H3 控制中心 | 805,315,950,750
+[ControlType.Text] name='QCY H3' id='' enabled=True off=False rect=834,373,199,25
+[ControlType.Text] name='控制中心' id='' enabled=True off=False rect=834,398,199,20
+[ControlType.RadioButton] name='概览' id='NavOverview' enabled=True off=False selected=False rect=834,440,199,44
+[ControlType.Text] name='概览' id='' enabled=True off=False rect=876,451,35,22
+[ControlType.RadioButton] name='降噪' id='NavNoise' enabled=True off=False selected=False rect=834,490,199,44
+[ControlType.Text] name='降噪' id='' enabled=True off=False rect=876,501,35,22
+[ControlType.RadioButton] name='声音' id='NavSound' enabled=True off=False selected=False rect=834,538,199,44
+[ControlType.Text] name='声音' id='' enabled=True off=False rect=876,549,35,22
+[ControlType.RadioButton] name='功能' id='NavFeature' enabled=True off=False selected=True rect=834,588,199,44
+[ControlType.Text] name='功能' id='' enabled=True off=False rect=876,599,35,22
+[ControlType.RadioButton] name='连接' id='NavConnection' enabled=True off=False selected=False rect=834,636,199,44
+[ControlType.Text] name='连接' id='' enabled=True off=False rect=876,647,35,22
+[ControlType.RadioButton] name='设置' id='NavSettings' enabled=True off=False selected=False rect=834,686,199,44
+[ControlType.Text] name='设置' id='' enabled=True off=False rect=876,697,35,22
+[ControlType.Pane] name='' id='' enabled=True off=False rect=1054,353,692,703
+[ControlType.Text] name='功能' id='' enabled=True off=False rect=1084,378,611,33
+[ControlType.Text] name='游戏模式' id='' enabled=True off=False rect=1105,447,569,22
+[ControlType.Text] name='开启后耳机进入低延迟模式（可能增加功耗）。与概览页开关同步。' id='' enabled=True off=False rect=1105,471,569,17
+[ControlType.Button] name='' id='FeatureGameModeSwitch' enabled=True off=False toggle=Off rect=1629,455,45,25
+[ControlType.Text] name='自动关机' id='' enabled=True off=False rect=1084,529,611,17
+[ControlType.Text] name='自动关机' id='' enabled=True off=False rect=1105,577,394,22
+[ControlType.Text] name='耳机无操作超过该时长后自动关机；「不自动关机」保持常开。选择后立即写入耳机。' id='' enabled=True off=False rect=1105,601,394,35
+[ControlType.ComboBox] name='' id='AutoOffCombo' enabled=True off=False expand=Collapsed rect=1499,593,175,27
+[ControlType.Text] name='按键与音效' id='' enabled=True off=False rect=1084,677,611,17
+[ControlType.Text] name='按键自定义' id='' enabled=True off=False rect=1105,725,423,22
+[ControlType.Text] name='自定义各按键单击/双击/长按对应的功能；出厂配置只读展示，保存时整表写回。' id='' enabled=True off=False rect=1105,749,423,35
+[ControlType.Button] name='打开按键编辑器' id='OpenKeyMapEditorButton' enabled=True off=False rect=1528,735,146,40
+[ControlType.Text] name='打开按键编辑器' id='' enabled=True off=False rect=1546,745,109,20
+[ControlType.Separator] name='' id='' enabled=False off=False rect=1105,799,569,1
+[ControlType.Text] name='查找耳机' id='' enabled=True off=False rect=1105,815,470,22
+[ControlType.Text] name='耳机以当前音量响铃，帮助定位。点击后会先弹出确认。' id='' enabled=True off=False rect=1105,839,470,17
+[ControlType.Button] name='查找耳机' id='FindEarbudsButton' enabled=True off=False rect=1575,815,99,40
+[ControlType.Text] name='查找耳机' id='' enabled=True off=False rect=1593,825,62,20
+[ControlType.Separator] name='' id='' enabled=False off=False rect=1105,871,569,1
+[ControlType.Text] name='播放提示音' id='' enabled=True off=False rect=1105,887,454,22
+[ControlType.Text] name='耳机外放一段提示音。点击后会先弹出确认。' id='' enabled=True off=False rect=1105,911,454,17
+[ControlType.Button] name='播放提示音' id='PlayToneButton' enabled=True off=False rect=1559,887,115,40
+[ControlType.Text] name='播放提示音' id='' enabled=True off=False rect=1577,897,78,20
+[ControlType.Text] name='' id='FeatureHintText' enabled=True off=False rect=1105,941,569,17
+[ControlType.Text] name='双设备连接' id='' enabled=True off=False rect=1084,998,611,17
+[ControlType.Text] name='双设备连接' id='' enabled=True off=False rect=1105,1046,569,22
+[ControlType.Text] name='由手机 QCY App 管理' id='' enabled=True off=False rect=1537,1046,137,22
+[ControlType.Text] name='双设备连接由手机 QCY App 管理：当前固件不支持通过第三方工具读写该设置。' id='' enabled=True off=False rect=1105,1076,569,17
+[ControlType.ScrollBar] name='' id='VerticalScrollBar' enabled=True off=False range=0 rect=1725,353,21,703
+[ControlType.Button] name='' id='PART_LineUpButton' enabled=False off=False rect=1725,353,21,21
+[ControlType.Button] name='' id='PageUp' enabled=False off=False rect=Empty
+[ControlType.Button] name='' id='PageDown' enabled=False off=False rect=1725,961,21,74
+[ControlType.Thumb] name='' id='' enabled=False off=False rect=1725,374,21,587
+[ControlType.Button] name='' id='PART_LineDownButton' enabled=False off=False rect=1725,1035,21,21
+

@@ -23,7 +23,11 @@ public class ConnectionManagerTests
     ];
 
     private static ConnectionManager CreateManager(FakeTransportFactory factory, FakeScanner scanner)
-        => new(factory, scanner) { ReconnectBackoff = (TimeSpan[])TestBackoff.Clone() };
+        => new(factory, scanner)
+        {
+            ReconnectBackoff = (TimeSpan[])TestBackoff.Clone(),
+            PostDisconnectReconnectDelay = TimeSpan.FromMilliseconds(30),   // 冷却默认 2s，测试压到毫秒级
+        };
 
     // ───────────────────────── 连接成功流程 ─────────────────────────
 
@@ -49,7 +53,8 @@ public class ConnectionManagerTests
 
         Assert.True(connected);
         Assert.Equal(ConnectionState.Connected, manager.State);
-        Assert.Equal([ConnectionState.Connecting, ConnectionState.Connected], states);
+        // 阶段 2：握手后先进入 Syncing（初始化读），再 Connected（数据事件晚于状态事件，D9）
+        Assert.Equal([ConnectionState.Connecting, ConnectionState.Syncing, ConnectionState.Connected], states);
         Assert.Equal(85, battery);
 
         var transport = Assert.IsType<ScriptedH3Transport>(factory.Created.Single());
@@ -58,10 +63,12 @@ public class ConnectionManagerTests
         byte[] handshake = transport.WrittenFrames[0];
         Assert.Equal(OpCode.NotifyCommunicationWay, handshake[4]);
         Assert.Equal(new byte[] { 0x00, 0x00 }, handshake[8..^1]);
-        // 握手 + 电量 + 降噪模式 + EQ v1（替换原 v2 读，v1 成功不再回退）+ 游戏模式 = 5 帧
-        Assert.Equal(5, transport.WrittenFrames.Count);
+        // 握手 + 电量 + 降噪模式 + EQ v1（替换原 v2 读，v1 成功不再回退）+ 游戏模式 + 自动关机 = 6 帧
+        Assert.Equal(6, transport.WrittenFrames.Count);
         byte[] eqFrame = transport.WrittenFrames[3];           // params 从 [8] 起：FE 01 20
         Assert.Equal(new byte[] { 0xFE, 0x01, EqV1.Cmd }, eqFrame[8..11]);
+        byte[] powerManagerFrame = transport.WrittenFrames[5]; // 阶段 4b：初始化读含自动关机 FE 01 14
+        Assert.Equal(new byte[] { 0xFE, 0x01, PowerManager.Cmd }, powerManagerFrame[8..11]);
 
         DeviceData data = manager.CurrentDeviceData;
         Assert.Equal(4, data.NoiseMode);                       // 17 03 01 01 02 → 降噪高
@@ -71,6 +78,8 @@ public class ConnectionManagerTests
         Assert.Equal(EqV1BandMap.Frequencies, data.EqV1?.Bands.Select(band => band.Frequency).ToArray());
         Assert.All(data.EqV1?.Bands ?? [], band => Assert.Equal(0, band.Gain));
         Assert.True(data.GameMode);
+        Assert.Equal(PowerManagerInfo.NeverOffMinutes, data.AutoOffMinutes);   // 真机基线：不自动关机
+        Assert.Equal(DataValidity.Available, data.AutoOffValidity);
     }
 
     // 未设置目标就连接 → InvalidOperationException。
@@ -190,7 +199,7 @@ public class ConnectionManagerTests
         Assert.False(manager.CurrentDeviceData.GameMode);
     }
 
-    // 全量刷新：连接后再各读一遍电量/降噪/EQ/游戏模式（额外 4 帧，电量事件再次触发）。
+    // 全量刷新：连接后再各读一遍电量/降噪/EQ/游戏模式/自动关机（额外 5 帧，电量事件再次触发）。
     [Fact]
     public async Task RefreshAll_RereadsAllValues()
     {
@@ -207,7 +216,7 @@ public class ConnectionManagerTests
 
         await manager.RefreshAllAsync().WaitAsync(TestTimeout);
 
-        Assert.Equal(before + 4, transport.WrittenFrames.Count);
+        Assert.Equal(before + 5, transport.WrittenFrames.Count);
         Assert.Equal(1, refreshCount);                        // 订阅在连接完成后，RefreshAll 触发一次
         Assert.Equal(ConnectionState.Connected, manager.State);
     }

@@ -2,51 +2,73 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-      共享视觉样式（对照 SonyHeadphonesController 风格）：
-      深灰 #4D4D4D 为选中/激活色，浅灰 #F0F0F0 为控件底色，白卡片 + 圆角 + 柔和阴影。
+      ══════════════════════════════════════════════════════════════════
+      基础控件模板（阶段 3a，plan.md P1-1 #1 / P0-2 #1）。
+      规则：
+      - 一切颜色 / 度量只引用 Tokens.xaml（App.xaml 中先于本文件合并），零硬编码；
+      - 全部交互模板覆盖 Normal / Hover / Pressed / Checked / Disabled；
+      - Checked 深底上一律白字（ContentPresenter 显式 TextElement.Foreground）；
+      - 禁止负 margin（D2 根治）：文字用 VerticalAlignment=Center + MinHeight + Padding 语义化；
+      - 文字渲染走窗口级 Ideal + ClearType + UseLayoutRounding（见 ControlPanelWindow）。
+      ══════════════════════════════════════════════════════════════════
     -->
 
-    <!-- ═══════════════ 颜色 ═══════════════ -->
-    <SolidColorBrush x:Key="AccentBrush" Color="#4D4D4D"/>
-    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#F0F0F0"/>
-    <SolidColorBrush x:Key="ControlHoverBrush" Color="#E8E8E8"/>
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1F1F1F"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#555555"/>
-    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#8A8A8A"/>
-    <SolidColorBrush x:Key="ConnectedBrush" Color="#3D8B5F"/>
-    <SolidColorBrush x:Key="DisconnectedBrush" Color="#9E9E9E"/>
-    <SolidColorBrush x:Key="DangerBrush" Color="#D32F2F"/>
-    <SolidColorBrush x:Key="TrackLineBrush" Color="#E4E4E4"/>
-
-    <!-- ═══════════════ 小节标签（电量 / 噪声控制 / 均衡器） ═══════════════ -->
-    <Style x:Key="SectionLabel" TargetType="{x:Type TextBlock}">
-        <Setter Property="FontSize" Value="11"/>
-        <Setter Property="Foreground" Value="{StaticResource TextTertiaryBrush}"/>
-        <Setter Property="Margin" Value="0,14,0,6"/>
+    <!--
+      隐式 TextBlock：全局 CJK 安全字族（D2 根治之二——DevicePicker/EqDetail 等
+      未改造窗口同样受益）。TextBlock 的隐式样式可穿越模板边界，chips 内的
+      自动生成 TextBlock 亦被覆盖。
+    -->
+    <Style TargetType="{x:Type TextBlock}">
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
     </Style>
 
-    <!-- ═══════════════ 扁平小按钮（↻ 刷新 / ⚙ 设置） ═══════════════ -->
+    <!-- ═══════════════ 小节标签（电量 / 噪声控制 / 均衡器） ═══════════════ -->
+    <Style x:Key="SectionLabel" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Caption}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Text.Tertiary}"/>
+        <Setter Property="Margin" Value="{StaticResource Spacing/Label.Below}"/>
+    </Style>
+
+    <!-- ═══════════════ 幽灵小按钮（↻ 重连 / ⚙ 设置 / 控制中心） ═══════════════ -->
     <Style x:Key="IconButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Ghost.Foreground}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Body}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/IconButton.Padding}"/>
+        <Setter Property="MinWidth" Value="{StaticResource Size/IconButton.MinSize}"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/IconButton.MinSize}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Focusable" Value="False"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Padding" Value="6,2"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border x:Name="Root"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="6"
+                            CornerRadius="{StaticResource CornerRadius/Small}"
                             Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <ContentPresenter x:Name="Content"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <!-- 顺序即优先级：Disabled 最后覆盖 Hover/Pressed；Checked 兜底（本模板无 Checked） -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ControlHoverBrush}"/>
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Ghost.Background.Hover}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Ghost.Foreground.Hover}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#DCDCDC"/>
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Ghost.Background.Pressed}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Ghost.Foreground.Hover}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Ghost.Foreground.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -54,14 +76,133 @@
         </Setter>
     </Style>
 
+    <!-- ═══════════════ 降级横幅（Danger 浅底；唯一用途：Degraded 相） ═══════════════ -->
+    <Style x:Key="Banner" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{StaticResource Brush/Banner.Danger.Background}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush/Banner.Danger.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Small}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/Banner.Padding}"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource Brush/Banner.Danger.Foreground}"/>
+        <Setter Property="TextElement.FontSize" Value="{StaticResource Font/Size.Caption}"/>
+    </Style>
+
+    <!--
+      ═══════════════ 窗体标准按钮（阶段 3b：控制中心 / EQ 编辑器） ═══════════════
+      主操作（AccentButton）与次操作（SecondaryButton）；全部状态覆盖，颜色只取 Tokens。
+    -->
+    <Style x:Key="AccentButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="{StaticResource Brush/Accent}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Text.OnAccent}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Body}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/Button.Padding}"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/Button.MinHeight}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource CornerRadius/Control}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter x:Name="Content"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Accent.Hover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Accent.Pressed}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Disabled}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Text.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SecondaryButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="{StaticResource Brush/Surface.Card}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Text.Primary}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Body}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/Button.Padding}"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/Button.MinHeight}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource Brush/Border.Subtle}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerRadius/Control}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter x:Name="Content"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Hover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Pressed}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Subtle}"/>
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Text.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 表单文本框（EQ 配置命名等） -->
+    <Style x:Key="FormTextBox" TargetType="{x:Type TextBox}">
+        <Setter Property="Background" Value="{StaticResource Brush/Surface.Card}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Text.Primary}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Body}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/Chip.Padding}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/Button.MinHeight}"/>
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource Brush/Accent}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="{StaticResource Brush/Surface.Subtle}"/>
+                <Setter Property="Foreground" Value="{StaticResource Brush/Text.Disabled}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!--
       ═══════════════ 噪声四段分段控件的单段 ═══════════════
-      段本身透明，滑动高亮块（#4D4D4D）由窗口代码在容器层绘制并动画；
-      选中时文字切白。
+      段本身透明；选中滑块（Brush/Segment.Thumb 主色）由窗口代码在容器层绘制并动画。
+      状态覆盖：Normal 次级字 / Hover 主字 / Pressed 主字 / Checked 白字（深底保证）/
+      Disabled 禁用字 + 箭头光标。
     -->
     <Style x:Key="SegmentRadioButton" TargetType="{x:Type RadioButton}">
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Segment.Foreground}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Body}"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/Segment.MinHeight}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template">
@@ -70,11 +211,23 @@
                     <Border Background="Transparent">
                         <ContentPresenter x:Name="Content"
                                           HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
+                                          VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Segment.Foreground.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Segment.Foreground.Hover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Segment.Foreground.Hover}"/>
+                        </Trigger>
+                        <!-- Checked 最后声明：覆盖 Hover/Pressed（选中白字不随悬停变暗） -->
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="White"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Segment.Foreground.Checked}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -84,29 +237,54 @@
 
     <!--
       ═══════════════ 圆角 chip（EQ 预设） ═══════════════
-      底 #F0F0F0，选中时深色实底白字（透明度过渡动画）。
+      选中 = Accent 实底白字（透明度过渡动画）。D2 根治：无负 margin、
+      MinHeight ≥ 30、垂直 Padding ≥ 6、MinWidth 保证三字中文不换行。
+      状态覆盖：Normal / Hover / Pressed / Checked / Disabled。
     -->
-    <Style x:Key="ChipRadioButton" TargetType="{x:Type RadioButton}">
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="FontSize" Value="12"/>
+    <Style x:Key="PresetChip" TargetType="{x:Type RadioButton}">
+        <Setter Property="Background" Value="{StaticResource Brush/Chip.Background}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush/Chip.Foreground}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Body}"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/Chip.MinHeight}"/>
+        <Setter Property="MinWidth" Value="{StaticResource Size/Chip.MinWidth}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/Chip.Padding}"/>
+        <Setter Property="Margin" Value="{StaticResource Spacing/Chip}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Focusable" Value="False"/>
-        <Setter Property="Margin" Value="0,0,6,6"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
-                    <Border x:Name="Root" Background="{StaticResource ControlBackgroundBrush}" CornerRadius="13" Padding="12,5">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource CornerRadius/Chip}"
+                            Padding="{TemplateBinding Padding}">
                         <Grid>
-                            <Border x:Name="Overlay" Background="{StaticResource AccentBrush}" CornerRadius="13" Opacity="0"/>
+                            <Border x:Name="Overlay"
+                                    Background="{StaticResource Brush/Chip.Background.Checked}"
+                                    CornerRadius="{StaticResource CornerRadius/Chip}"
+                                    Opacity="0"/>
                             <ContentPresenter x:Name="Content"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center"
-                                              Margin="0,-1,0,0"/>
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ControlHoverBrush}"/>
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Hover}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Pressed}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Disabled}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Trigger.EnterActions>
@@ -127,7 +305,7 @@
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
-                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="White"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Checked}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -138,67 +316,38 @@
     <!--
       ═══════════════ 小号 chip（降噪等级 低/中/高 与场景 通勤/室内/抗风） ═══════════════
     -->
-    <Style x:Key="SmallChipRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource ChipRadioButton}">
-        <Setter Property="FontSize" Value="11"/>
-        <Setter Property="Margin" Value="0"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type RadioButton}">
-                    <Border x:Name="Root" Background="{StaticResource ControlBackgroundBrush}" CornerRadius="9" Padding="9,4">
-                        <Grid>
-                            <Border x:Name="Overlay" Background="{StaticResource AccentBrush}" CornerRadius="9" Opacity="0"/>
-                            <ContentPresenter x:Name="Content"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="0,-1,0,0"/>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ControlHoverBrush}"/>
-                        </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Overlay"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="1" Duration="0:0:0.15"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Overlay"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="0" Duration="0:0:0.15"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="White"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+    <Style x:Key="PresetChipSmall" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource PresetChip}">
+        <Setter Property="FontSize" Value="{StaticResource Font/Size.Caption}"/>
+        <Setter Property="MinHeight" Value="{StaticResource Size/Chip.Small.MinHeight}"/>
+        <Setter Property="MinWidth" Value="{StaticResource Size/Chip.Small.MinWidth}"/>
+        <Setter Property="Padding" Value="{StaticResource Spacing/Chip.Small.Padding}"/>
+        <Setter Property="Margin" Value="{StaticResource Spacing/Chip.Horizontal}"/>
     </Style>
 
     <!--
       ═══════════════ 游戏模式开关（36×20 轨道 + 14×14 白色圆钮，滑动动画） ═══════════════
+      状态覆盖：Normal（灰轨）/ Checked（主色轨，150ms 色彩+位移动画）/
+      Disabled（禁用灰轨 + 箭头光标）/ Hover 与 Pressed（轨迹色加深一档）。
     -->
     <Style x:Key="SwitchToggleButton" TargetType="{x:Type ToggleButton}">
-        <Setter Property="Width" Value="36"/>
-        <Setter Property="Height" Value="20"/>
+        <Setter Property="Width" Value="{StaticResource Size/Switch.Width}"/>
+        <Setter Property="Height" Value="{StaticResource Size/Switch.Height}"/>
+        <Setter Property="Background" Value="{StaticResource Brush/Switch.Track.Off}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
                     <Grid Background="Transparent">
-                        <Border x:Name="Track" Background="#D9D9D9" CornerRadius="10"/>
-                        <Ellipse x:Name="Thumb" Width="14" Height="14" Fill="White"
-                                 HorizontalAlignment="Left" Margin="3,0,0,0">
+                        <Border x:Name="Track"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource CornerRadius/Switch}"/>
+                        <Ellipse x:Name="Thumb"
+                                 Width="{StaticResource Size/Switch.Thumb}"
+                                 Height="{StaticResource Size/Switch.Thumb}"
+                                 Fill="{StaticResource Brush/Switch.Thumb}"
+                                 HorizontalAlignment="Left"
+                                 Margin="{StaticResource Spacing/Switch.ThumbInset}">
                             <Ellipse.Effect>
                                 <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270" Opacity="0.35"/>
                             </Ellipse.Effect>
@@ -208,16 +357,29 @@
                         </Ellipse>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Brush/Switch.Track.On}"/>
+                            <Setter Property="Opacity" Value="0.72"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Brush/Switch.Track.On}"/>
+                            <Setter Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Brush/Switch.Track.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                            <Setter Property="Opacity" Value="1"/>
+                        </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <ColorAnimation Storyboard.TargetName="Track"
                                                         Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                        To="#4D4D4D" Duration="0:0:0.15"/>
+                                                        To="{StaticResource Color/Switch.Track.On}" Duration="0:0:0.15"/>
                                         <DoubleAnimation Storyboard.TargetName="ThumbShift"
                                                          Storyboard.TargetProperty="X"
-                                                         To="16" Duration="0:0:0.15">
+                                                         To="{StaticResource Size/Switch.Travel}" Duration="0:0:0.15">
                                             <DoubleAnimation.EasingFunction>
                                                 <QuadraticEase EasingMode="EaseOut"/>
                                             </DoubleAnimation.EasingFunction>
@@ -230,7 +392,7 @@
                                     <Storyboard>
                                         <ColorAnimation Storyboard.TargetName="Track"
                                                         Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                        To="#D9D9D9" Duration="0:0:0.15"/>
+                                                        To="{StaticResource Color/Switch.Track.Off}" Duration="0:0:0.15"/>
                                         <DoubleAnimation Storyboard.TargetName="ThumbShift"
                                                          Storyboard.TargetProperty="X"
                                                          To="0" Duration="0:0:0.15">
@@ -248,7 +410,7 @@
         </Setter>
     </Style>
 
-    <!-- ═══════════════ EQ 编辑器滑杆（自制极简轨道 + 圆形拇指） ═══════════════ -->
+    <!-- ═══════════════ EQ 编辑器滑杆（自制极简轨道 + 圆形拇指；EqEditorWindow 使用） ═══════════════ -->
     <Style x:Key="SliderInvisibleRepeatButton" TargetType="{x:Type RepeatButton}">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="Focusable" Value="False"/>
@@ -267,7 +429,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Thumb}">
-                    <Ellipse Width="18" Height="18" Fill="{StaticResource AccentBrush}" Stroke="White" StrokeThickness="2">
+                    <Ellipse Width="18" Height="18" Fill="{StaticResource Brush/Accent}" Stroke="{StaticResource Brush/Surface.Card}" StrokeThickness="2">
                         <Ellipse.Effect>
                             <DropShadowEffect BlurRadius="3" ShadowDepth="1" Direction="270" Opacity="0.3"/>
                         </Ellipse.Effect>
@@ -285,7 +447,7 @@
                 <ControlTemplate TargetType="{x:Type Slider}">
                     <Grid Background="Transparent">
                         <Border Width="4" CornerRadius="2" HorizontalAlignment="Center"
-                                Background="{StaticResource TrackLineBrush}"/>
+                                Background="{StaticResource Brush/Border.Subtle}"/>
                         <Track x:Name="PART_Track" IsDirectionReversed="True">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="{x:Static Slider.DecreaseLarge}"
@@ -313,7 +475,7 @@
                 <ControlTemplate TargetType="{x:Type Slider}">
                     <Grid Background="Transparent" Height="18">
                         <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
-                                Background="{StaticResource TrackLineBrush}"/>
+                                Background="{StaticResource Brush/Border.Subtle}"/>
                         <Track x:Name="PART_Track" IsDirectionReversed="False">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="{x:Static Slider.DecreaseLarge}"

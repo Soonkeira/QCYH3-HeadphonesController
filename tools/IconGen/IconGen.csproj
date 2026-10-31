@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    一次性图标生成工具（阶段 5）：把正面简化头戴耳机矢量绘制成多尺寸 PNG 帧，
+    打包为多分辨率 ICO 输出到 src/QcyH3Tray.App/Assets/app.ico。
+    刻意不加入 QcyH3Tray.sln：它是资产再生工具而非产品组件，入 sln 会被
+    dotnet build/test/ publish 全量构建；源码保留在本目录可随时复现
+    （README「产品视觉说明」有用法）。
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+</Project>
