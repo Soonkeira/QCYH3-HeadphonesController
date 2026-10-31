@@ -31,11 +31,13 @@
     <Color x:Key="Color/Surface.Pressed">#E0E3E8</Color>
 
     <!--
-      玻璃拟态（2026-10-31）：半透明白卡片浮在 DWM 系统背景板（Mica/Acrylic）之上。
-      只作用于窗口背景与页面级卡片；控件层（chips / 分段 / 开关 / 滑块底）保持现有
-      不透明浅灰——对比度优先。深色主题留 .Dark 扩展位（当前浅色唯一主题）。
+      玻璃拟态（2026-10-31）：半透明白卡片浮在窗口背景板（弹出类 ACCENT 色调亚克力 /
+      控制中心 Mica）之上。只作用于窗口背景与页面级卡片；控件层（chips / 分段 / 开关 /
+      滑块底）保持现有不透明浅灰——对比度优先。深色主题留 .Dark 扩展位（当前浅色唯一主题）。
+      可见性调优（2026-10-31）：Card 72% 白叠在系统背景板上整体近全白、磨砂不可感知
+      （真机实锤），降到 60% 白让磨砂纹理透出；文字密集表单区 Strong 85% 白保持不动。
     -->
-    <Color x:Key="Color/Glass.Card">#B8FFFFFF</Color>
+    <Color x:Key="Color/Glass.Card">#99FFFFFF</Color>
     <Color x:Key="Color/Glass.Card.Strong">#D9FFFFFF</Color>
     <Color x:Key="Color/Glass.Border">#66FFFFFF</Color>
     <Color x:Key="Color/Glass.Hairline">#1A000000</Color>

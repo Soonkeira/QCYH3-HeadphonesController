@@ -5,23 +5,31 @@ using System.Windows.Media;
 
 namespace QcyH3Tray.App.Services;
 
-/// <summary>背景板请求模式：主窗口（Mica）或弹出类窗口（Acrylic）。</summary>
+/// <summary>背景板请求模式：主窗口（Mica）或弹出类窗口（色调亚克力）。</summary>
 internal enum BackdropMode
 {
-    /// <summary>主窗口（控制中心）：DWMSBT_MAINWINDOW（Mica）。</summary>
+    /// <summary>主窗口（控制中心）：DWMSBT_MAINWINDOW（Mica）语义正确，保持 SystemBackdrop 首选。</summary>
     Main,
 
-    /// <summary>弹出类窗口（快捷面板 / 对话框）：DWMSBT_TRANSIENTWINDOW（Acrylic）。</summary>
+    /// <summary>弹出类窗口（快捷面板 / EQ 编辑器 / 按键编辑器 / DevicePicker / 对话框）。</summary>
     Transient,
 }
 
 /// <summary>实际生效的背景板实现（降级梯队的落点）。</summary>
 internal enum BackdropKind
 {
-    /// <summary>DWM SystemBackdrop（DWMWA_SYSTEMBACKDROP_TYPE，Win11 22H2+，GPU 合成无输入延迟）。</summary>
+    /// <summary>
+    /// DWM SystemBackdrop（DWMWA_SYSTEMBACKDROP_TYPE，Win11 22H2+，GPU 合成无输入延迟）。
+    /// 主窗口首选（Mica）；弹出类降为回退——其浅色主题 Acrylic（DWMSBT_TRANSIENTWINDOW）
+    /// 是近白磨砂、色调不可定制，落在白底内容前视觉上不可见（2026-10-31 真机实锤）。
+    /// </summary>
     SystemBackdrop,
 
-    /// <summary>SetWindowCompositionAttribute ACCENT_ENABLE_ACRYLICBLURBEHIND 兜底（Win10 / 早期 Win11）。</summary>
+    /// <summary>
+    /// SetWindowCompositionAttribute ACCENT_ENABLE_ACRYLICBLURBEHIND（未公开 API）。
+    /// 弹出类首选（2026-10-31 可见性调优）：GradientColor 色调与 α 完全可控，中性浅灰低透明
+    /// tint 在白底内容前仍可感知"磨砂灰"；主窗口降为回退。已知代价见 <see cref="BackdropService"/>。
+    /// </summary>
     AccentBlur,
 
     /// <summary>终级兜底：不透明底色 Brush/Glass.Fallback（#F2F3F6）。</summary>
@@ -29,10 +37,20 @@ internal enum BackdropKind
 }
 
 /// <summary>
-/// 窗口级模糊玻璃拟态背景板（2026-10-31 玻璃拟态改造）：
-/// 首选 DWM SystemBackdrop（<c>DwmSetWindowAttribute(DWMWA_SYSTEMBACKDROP_TYPE)</c>，
-/// 浅色主题、不动 immersive dark mode）；失败按梯队降级到 ACCENT ACRYLICBLURBEHIND，
-/// 再失败落到不透明底色。每窗口写一行信息日志（<see cref="ErrorLog"/>）。
+/// 窗口级模糊玻璃拟态背景板（2026-10-31 玻璃拟态改造；同日可见性调优反转弹出类梯队）：
+/// <para>
+/// 弹出类窗口（<see cref="BackdropMode.Transient"/>）首选 <see cref="BackdropKind.AccentBlur"/>：
+/// ACCENT 亚克力的 GradientColor 色调与 α 完全可控，中性浅灰低透明 tint 在白底网页等内容前
+/// 仍可感知磨砂；DWM SystemBackdrop（<c>DwmSetWindowAttribute(DWMWA_SYSTEMBACKDROP_TYPE)</c>，
+/// 浅色主题 DWMSBT_TRANSIENTWINDOW 是近白磨砂、色调不可定制）降为回退档。
+/// 控制中心（<see cref="BackdropMode.Main"/>）保持 Mica 语义：SystemBackdrop(DWMSBT_MAINWINDOW)
+/// 首选、AccentBlur 回退。两者最终失败均落到不透明底色。每窗口写一行信息日志。
+/// </para>
+/// <para>
+/// 已知代价（照实记录）：ACCENT ACRYLICBLURBEHIND 属未公开 API，微软未文档化；Win10 时代
+/// 社区普遍报告部分场景输入延迟（拖动/点击响应拖影）。本机 Win11 26200 实测流畅，以真机为准；
+/// 如需对比 GPU 合成档，用诊断开关强制 <c>QCYH3TRAY_BACKDROP=system</c>。
+/// </para>
 /// <para>
 /// 调用约定：在窗口 <c>SourceInitialized</c> 之后调用（句柄已创建）。成功路径要求窗口
 /// Background=Transparent（XAML 已如此），WPF 透明区域经扩展帧透出系统背景板；
@@ -42,7 +60,8 @@ internal enum BackdropKind
 /// <para>
 /// 诊断开关：环境变量 <c>QCYH3TRAY_BACKDROP</c> = <c>system</c> / <c>accent</c> /
 /// <c>opaque</c>（大小写不敏感）可强制走某一档，用于真机降级对比；未设置或无法识别
-/// 时按自动梯队（SystemBackdrop → AccentBlur → Opaque）。
+/// 时按自动梯队（弹出类 AccentBlur → SystemBackdrop → Opaque；主窗口 SystemBackdrop →
+/// AccentBlur → Opaque）。
 /// </para>
 /// </summary>
 internal static class BackdropService
@@ -59,6 +78,19 @@ internal static class BackdropService
     private const int ACCENT_ENABLE_ACRYLICBLURBEHIND = 4;
     // 经验值：避免窗口边缘出现黑边伪影（社区 WPF Acrylic 兜底实现通用取值）
     private const int ACCENT_FLAG_EDGE_FIX = 0x2;
+
+    // ─── ACCENT 亚克力 tint（2026-10-31 可见性调优）────────────────────────
+    // 中性浅灰低透明：ARGB #59EEF1F6（α=0x59 ≈ 35%）。纯白 tint 在浅色主题下与
+    // DWM Acrylic 一样"隐形"，必须带一点灰让磨砂在白底内容前可感知；透明度压低
+    // 到约 1/3 让背景模糊纹理透出，同时保持文字可读。按实机截图迭代定值。
+    internal const byte AccentTintAlpha = 0x59;
+    internal const byte AccentTintR = 0xEE;
+    internal const byte AccentTintG = 0xF1;
+    internal const byte AccentTintB = 0xF6;
+
+    /// <summary>打包后的 ACCENT tint（字节序见 <see cref="PackAccentGradientColor"/>），测试锁定用。</summary>
+    internal static readonly uint AccentTintGradientColor =
+        PackAccentGradientColor(AccentTintAlpha, AccentTintR, AccentTintG, AccentTintB);
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int sizeOfValue);
@@ -86,6 +118,7 @@ internal static class BackdropService
         public int SizeOfData;
     }
 
+    /// <summary>SetWindowCompositionAttribute WCA_ACCENT_POLICY 的未公开策略结构；GradientColor 为 ABGR 打包。</summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct AccentPolicy
     {
@@ -110,38 +143,36 @@ internal static class BackdropService
         string label = window.Title;
         BackdropKind? forced = ResolveOverride(Environment.GetEnvironmentVariable(OverrideEnvironmentVariable));
 
-        // 1) 首选：DWM SystemBackdrop（Win11 22H2+）
-        if (forced is null or BackdropKind.SystemBackdrop)
+        // 降级梯队（2026-10-31 可见性调优：弹出类反转，ACCENT 色调亚克力升为首选）：
+        //   Main（控制中心）：SystemBackdrop(Mica) → AccentBlur → Opaque（主窗口语义不变）
+        //   Transient（弹出类）：AccentBlur（tint α 可控、白底内容前可感知）
+        //                       → SystemBackdrop(DWM Acrylic，浅色主题近白) → Opaque
+        BackdropKind[] ladder = mode == BackdropMode.Main
+            ? [BackdropKind.SystemBackdrop, BackdropKind.AccentBlur, BackdropKind.Opaque]
+            : [BackdropKind.AccentBlur, BackdropKind.SystemBackdrop, BackdropKind.Opaque];
+
+        foreach (BackdropKind kind in ladder)
         {
-            if (TryApplySystemBackdrop(hwnd, mode, out int hr))
+            if (forced is not null && forced != kind)
             {
-                ErrorLog.Write($"[Backdrop] 窗口「{label}」= SystemBackdrop({Describe(mode)}){Suffix(forced)}");
+                continue;   // 诊断覆盖只走被强制的档位
+            }
+
+            (bool applied, string detail) = TryRung(kind, hwnd, mode);
+            if (applied)
+            {
+                ErrorLog.Write($"[Backdrop] 窗口「{label}」= {detail}{Suffix(forced)}");
                 return;
             }
-            if (forced == BackdropKind.SystemBackdrop)
+            if (forced == kind)
             {
-                // 强制 system 却失败（旧系统）：直接落到不透明底，保证可读性
-                ApplyOpaque(window, label, forced, $"hr=0x{hr:X8}");
+                // 强制档失败（旧系统 / 调用失败）：直接落到不透明底，保证可读性
+                ApplyOpaque(window, label, forced, $"强制 {kind} 失败（{detail}）");
                 return;
             }
         }
 
-        // 2) 兜底一：SetWindowCompositionAttribute ACRYLICBLURBEHIND（Win10 / 旧 Win11）
-        if (forced is null or BackdropKind.AccentBlur)
-        {
-            if (TryApplyAccentBlur(hwnd))
-            {
-                ErrorLog.Write($"[Backdrop] 窗口「{label}」= AccentBlur(ACRYLICBLURBEHIND) 兜底{Suffix(forced)}");
-                return;
-            }
-            if (forced == BackdropKind.AccentBlur)
-            {
-                ApplyOpaque(window, label, forced, "AccentBlur 调用失败");
-                return;
-            }
-        }
-
-        // 3) 终级兜底：不透明底色（可读性优先）
+        // 自动梯队全部失败：终级兜底不透明底色（可读性优先）
         string reason = forced == BackdropKind.Opaque
             ? "诊断覆盖强制 Opaque"
             : "SystemBackdrop 与 AccentBlur 均不可用";
@@ -158,27 +189,59 @@ internal static class BackdropService
         _ => null,
     };
 
-    private static bool TryApplySystemBackdrop(IntPtr hwnd, BackdropMode mode, out int hresult)
+    /// <summary>
+    /// 尝试一个背景板档位：成功返回 (true, 日志描述)；失败返回 (false, 失败原因摘要)。
+    /// </summary>
+    private static (bool Applied, string Detail) TryRung(BackdropKind kind, IntPtr hwnd, BackdropMode mode) => kind switch
+    {
+        BackdropKind.SystemBackdrop => TrySystemBackdropRung(hwnd, mode),
+        BackdropKind.AccentBlur => TryAccentBlurRung(hwnd),
+        _ => (false, "未知档位"),
+    };
+
+    private static (bool Applied, string Detail) TrySystemBackdropRung(IntPtr hwnd, BackdropMode mode)
+    {
+        int hr = TryApplySystemBackdrop(hwnd, mode);
+        return hr == 0
+            ? (true, $"SystemBackdrop({Describe(mode)})")
+            : (false, $"SystemBackdrop 失败 hr=0x{hr:X8}");
+    }
+
+    private static (bool Applied, string Detail) TryAccentBlurRung(IntPtr hwnd)
+    {
+        return TryApplyAccentBlur(hwnd)
+            ? (true, $"AccentBlur(ACRYLICBLURBEHIND tint=#{AccentTintR:X2}{AccentTintG:X2}{AccentTintB:X2} α=0x{AccentTintAlpha:X2})")
+            : (false, "AccentBlur 调用失败");
+    }
+
+    /// <summary>
+    /// AccentPolicy.GradientColor 按 COLORREF 习惯为 ABGR 打包（0xAABBGGRR：α 在最高字节，
+    /// B/G/R 依次排下）。单独提出便于测试锁定 tint 值——调用点用 ARGB 语义传参，
+    /// 字节序细节不散落。
+    /// </summary>
+    internal static uint PackAccentGradientColor(byte a, byte r, byte g, byte b) =>
+        (uint)((a << 24) | (b << 16) | (g << 8) | r);
+
+    /// <summary>应用 DWM SystemBackdrop，返回 HRESULT（0 = 成功）。</summary>
+    private static int TryApplySystemBackdrop(IntPtr hwnd, BackdropMode mode)
     {
         try
         {
             // 先把帧扩展到整个客户区（-1）：SystemBackdrop 只在扩展帧区域透出
             var margins = new MARGINS { LeftWidth = -1, RightWidth = -1, TopHeight = -1, BottomHeight = -1 };
-            hresult = DwmExtendFrameIntoClientArea(hwnd, ref margins);
-            if (hresult != 0)
+            int hr = DwmExtendFrameIntoClientArea(hwnd, ref margins);
+            if (hr != 0)
             {
-                return false;
+                return hr;
             }
             EnsureTransparentComposition(hwnd);
 
             int backdropType = mode == BackdropMode.Main ? DWMSBT_MAINWINDOW : DWMSBT_TRANSIENTWINDOW;
-            hresult = DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, sizeof(int));
-            return hresult == 0;
+            return DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, sizeof(int));
         }
         catch (Exception)
         {
-            hresult = unchecked((int)0xFFFFFFFF);
-            return false;
+            return unchecked((int)0xFFFFFFFF);
         }
     }
 
@@ -206,12 +269,14 @@ internal static class BackdropService
             }
             EnsureTransparentComposition(hwnd);
 
-            // GradientColor 为 ABGR：淡白 40% 叠加，保证透明区域兜底可读
+            // GradientColor 字节序见 PackAccentGradientColor（COLORREF ABGR 习惯）。
+            // tint 用中性浅灰低透明（#59EEF1F6）：这是弹出类首选 ACCENT 而非 SystemBackdrop
+            // 的根本原因——α 可控，磨砂在白底内容前可见。已知代价（输入延迟传闻）见类注释。
             var policy = new AccentPolicy
             {
                 AccentState = ACCENT_ENABLE_ACRYLICBLURBEHIND,
                 AccentFlags = ACCENT_FLAG_EDGE_FIX,
-                GradientColor = 0x66FFFFFF,
+                GradientColor = AccentTintGradientColor,
             };
             IntPtr policyPointer = Marshal.AllocHGlobal(Marshal.SizeOf(policy));
             try

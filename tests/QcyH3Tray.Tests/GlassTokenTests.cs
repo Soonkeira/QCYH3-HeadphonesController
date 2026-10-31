@@ -6,11 +6,12 @@ using Xunit;
 namespace QcyH3Tray.Tests;
 
 /// <summary>
-/// 玻璃拟态视觉 Token 契约（2026-10-31 改造）：
+/// 玻璃拟态视觉 Token 契约（2026-10-31 改造；同日可见性调优）：
 /// - CornerRadius/Chip = 8（圆角方框，与 CornerRadius/Control=9 同族；交付 1 锁定值，
 ///   防止回归到 999 胶囊）；
-/// - 玻璃画刷齐全且透明度符合设计（Glass.Card 72% 白 / Glass.Card.Strong 85% 白 /
-///   Glass.Border 40% 白 / Glass.Fallback = #F2F3F6 不透明降级底色）。
+/// - 玻璃画刷齐全且透明度符合设计（Glass.Card 60% 白——可见性调优：72% 叠系统背景板
+///   整体近全白、磨砂不可感知 / Glass.Card.Strong 85% 白 / Glass.Border 40% 白 /
+///   Glass.Fallback = #F2F3F6 不透明降级底色）。
 /// 注：测试宿主没有 Application 资源作用域，按文件路径直接解析 Tokens.xaml
 /// （与运行时同一份文件，而非拷贝），模式与 HeadphoneArtResourceTests 一致。
 /// </summary>
@@ -52,7 +53,7 @@ public class GlassTokenTests
         var tokens = LoadTokens();
 
         var card = Assert.IsType<SolidColorBrush>(tokens["Brush/Glass.Card"]);
-        Assert.Equal(0xB8, card.Color.A);
+        Assert.Equal(0x99, card.Color.A);
         Assert.Equal(0xFF, card.Color.R);
         Assert.Equal(0xFF, card.Color.G);
         Assert.Equal(0xFF, card.Color.B);
