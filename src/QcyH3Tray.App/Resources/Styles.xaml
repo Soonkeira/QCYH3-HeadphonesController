@@ -240,6 +240,12 @@
       选中 = Accent 实底白字（透明度过渡动画）。D2 根治：无负 margin、
       MinHeight ≥ 30、垂直 Padding ≥ 6、MinWidth 保证三字中文不换行。
       状态覆盖：Normal / Hover / Pressed / Checked / Disabled。
+      结构规则（根治"选中蓝底只盖住文字区"缺陷）：
+      - Root 不挂 Padding——装饰层必须与 Root 等大，才能铺满整颗胶囊；
+      - Padding 移交内容层（ContentPresenter Margin），布局度量与此前完全一致；
+      - Normal/Hover/Pressed/Disabled 仍切换 Root.Background（元素自身的背景
+        本来就覆盖 Padding 环，无此问题）；Checked 走全尺寸 Overlay 淡入，
+        Opacity=1 时整颗胶囊为 Accent 实底，悬停背景被完全盖住（Checked 优先）。
     -->
     <Style x:Key="PresetChip" TargetType="{x:Type RadioButton}">
         <Setter Property="Background" Value="{StaticResource Brush/Chip.Background}"/>
@@ -259,14 +265,14 @@
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Border x:Name="Root"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="{StaticResource CornerRadius/Chip}"
-                            Padding="{TemplateBinding Padding}">
+                            CornerRadius="{StaticResource CornerRadius/Chip}">
                         <Grid>
                             <Border x:Name="Overlay"
                                     Background="{StaticResource Brush/Chip.Background.Checked}"
                                     CornerRadius="{StaticResource CornerRadius/Chip}"
                                     Opacity="0"/>
                             <ContentPresenter x:Name="Content"
+                                              Margin="{TemplateBinding Padding}"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center"
                                               TextElement.Foreground="{TemplateBinding Foreground}"/>
