@@ -30,6 +30,17 @@
     <Color x:Key="Color/Surface.Hover">#E7E9EE</Color>
     <Color x:Key="Color/Surface.Pressed">#E0E3E8</Color>
 
+    <!--
+      玻璃拟态（2026-10-31）：半透明白卡片浮在 DWM 系统背景板（Mica/Acrylic）之上。
+      只作用于窗口背景与页面级卡片；控件层（chips / 分段 / 开关 / 滑块底）保持现有
+      不透明浅灰——对比度优先。深色主题留 .Dark 扩展位（当前浅色唯一主题）。
+    -->
+    <Color x:Key="Color/Glass.Card">#B8FFFFFF</Color>
+    <Color x:Key="Color/Glass.Card.Strong">#D9FFFFFF</Color>
+    <Color x:Key="Color/Glass.Border">#66FFFFFF</Color>
+    <Color x:Key="Color/Glass.Hairline">#1A000000</Color>
+    <Color x:Key="Color/Glass.Fallback">#F2F3F6</Color>
+
     <!-- 细边框（Fluent 观感的发丝线） -->
     <Color x:Key="Color/Border.Subtle">#E6E8EC</Color>
 
@@ -68,6 +79,12 @@
     <SolidColorBrush x:Key="Brush/Surface.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
     <SolidColorBrush x:Key="Brush/Border.Subtle" Color="{StaticResource Color/Border.Subtle}"/>
 
+    <SolidColorBrush x:Key="Brush/Glass.Card" Color="{StaticResource Color/Glass.Card}"/>
+    <SolidColorBrush x:Key="Brush/Glass.Card.Strong" Color="{StaticResource Color/Glass.Card.Strong}"/>
+    <SolidColorBrush x:Key="Brush/Glass.Border" Color="{StaticResource Color/Glass.Border}"/>
+    <SolidColorBrush x:Key="Brush/Glass.Hairline" Color="{StaticResource Color/Glass.Hairline}"/>
+    <SolidColorBrush x:Key="Brush/Glass.Fallback" Color="{StaticResource Color/Glass.Fallback}"/>
+
     <SolidColorBrush x:Key="Brush/Accent" Color="{StaticResource Color/Accent}"/>
     <SolidColorBrush x:Key="Brush/Accent.Hover" Color="{StaticResource Color/Accent.Hover}"/>
     <SolidColorBrush x:Key="Brush/Accent.Pressed" Color="{StaticResource Color/Accent.Pressed}"/>
@@ -88,7 +105,7 @@
       可交互控件的状态画刷（Normal / Hover / Pressed / Checked / Disabled）。
       模板里通过触发器切换；Checked 深底一律配 Brush/Text.OnAccent 白字（D2 类问题的展示保证）。
     -->
-    <!-- chip（EQ 预设等圆角胶囊） -->
+    <!-- chip（EQ 预设等圆角方框） -->
     <SolidColorBrush x:Key="Brush/Chip.Background" Color="{StaticResource Color/Surface.Subtle}"/>
     <SolidColorBrush x:Key="Brush/Chip.Background.Hover" Color="{StaticResource Color/Surface.Hover}"/>
     <SolidColorBrush x:Key="Brush/Chip.Background.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
@@ -169,7 +186,8 @@
     <!-- ═══════════════ 圆角 ═══════════════ -->
     <CornerRadius x:Key="CornerRadius/Card">16</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Control">9</CornerRadius>
-    <CornerRadius x:Key="CornerRadius/Chip">999</CornerRadius>
+    <!-- chip：圆角方框（与 Control 同族的 8），EQ 预设与降噪档位/场景统一；选中整框变蓝逻辑不变 -->
+    <CornerRadius x:Key="CornerRadius/Chip">8</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Small">6</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Switch">10</CornerRadius>
 

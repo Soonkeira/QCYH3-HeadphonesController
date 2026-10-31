@@ -7,7 +7,7 @@
         MinWidth="720"
         MinHeight="560"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource Brush/Surface}"
+        Background="Transparent"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Ideal"
@@ -19,6 +19,8 @@
       结构：左侧竖向导航（六分区，选中态用 Token 画刷）+ 右侧内容区（单页滚动）。
       窗口级引用 Tokens/Styles 现有资源；全部状态经 AppState 快照订阅（九态 + validity），
       写操作共用 AppState.RunWriteCommandAsync 通道（乐观更新 + 失败回滚与面板一致）。
+      玻璃拟态（2026-10-31）：主窗口 Mica（BackdropService，Main 档）——窗口背景透明，
+      导航栏与内容卡片用玻璃画刷，卡片间沟槽透出系统背景板；控件层保持不透明。
     -->
     <Window.Resources>
         <!-- 小节大标题 -->
@@ -30,10 +32,10 @@
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
 
-        <!-- 内容卡片 -->
+        <!-- 内容卡片（玻璃化：半透明白 + 发丝描边，浮在 Mica 上） -->
         <Style x:Key="Card" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource Brush/Surface.Card}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+            <Setter Property="Background" Value="{StaticResource Brush/Glass.Card}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
             <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>
@@ -134,9 +136,9 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ═══════════════ 左侧导航 ═══════════════ -->
-        <Border Background="{StaticResource Brush/Surface.Card}"
-                BorderBrush="{StaticResource Brush/Border.Subtle}"
+        <!-- ═══════════════ 左侧导航（玻璃栏：半透明白 + 玻璃发丝右描边） ═══════════════ -->
+        <Border Background="{StaticResource Brush/Glass.Card}"
+                BorderBrush="{StaticResource Brush/Glass.Hairline}"
                 BorderThickness="0,0,1,0">
             <StackPanel Margin="{StaticResource Spacing/Card.Padding}">
                 <TextBlock Text="QCY H3"

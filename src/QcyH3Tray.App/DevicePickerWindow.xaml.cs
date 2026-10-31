@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using QcyH3Tray.App.Services;
 using QcyH3Tray.Core.Ble;
 
 namespace QcyH3Tray.App;
@@ -7,7 +8,8 @@ namespace QcyH3Tray.App;
 /// <summary>
 /// 首启设备选择（模态）：扫描 6 秒 → 列表（名称/地址/RSSI，名称含 QCY 或 H3 的
 /// 置顶加粗）→ 双击或选中 + 确定保存目标并开始连接；取消 = 退出应用。
-/// 蓝牙未开启时给出明确提示。
+/// 蓝牙未开启时给出明确提示。玻璃拟态：弹出类 → Acrylic（BackdropService，Transient 档），
+/// 客户区整体 Glass.Card.Strong 玻璃底保证列表/小字对比度。
 /// </summary>
 public sealed partial class DevicePickerWindow : Window
 {
@@ -21,6 +23,10 @@ public sealed partial class DevicePickerWindow : Window
         InitializeComponent();
         _app = app;
     }
+
+    /// <summary>窗口句柄就绪：挂 DWM 系统背景板（弹出类 → Transient/Acrylic，降级梯队见 BackdropService）。</summary>
+    private void OnSourceInitialized(object sender, EventArgs eventArgs)
+        => BackdropService.Apply(this, BackdropMode.Transient);
 
     private async void OnScanClick(object sender, RoutedEventArgs eventArgs)
     {

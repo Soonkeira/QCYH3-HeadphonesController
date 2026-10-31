@@ -8,8 +8,10 @@
         MinHeight="360"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="False"
-        Background="#FFFFFF"
+        Background="Transparent"
+        SourceInitialized="OnSourceInitialized"
         Closing="OnClosing">
+    <!-- 玻璃拟态（2026-10-31）：圆角玻璃卡片浮在 Acrylic 上（列表 + 小字号文本，Strong 版保对比度） -->
     <Grid Margin="18">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,6 +19,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
+        <Border Grid.RowSpan="4"
+                Background="{StaticResource Brush/Glass.Card.Strong}"
+                BorderBrush="{StaticResource Brush/Glass.Border}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource CornerRadius/Card}"
+                Padding="6"/>
 
         <TextBlock Text="选择要控制的 QCY H3 耳机：扫描 6 秒后从列表中选择，然后点击「确定」。"
                    TextWrapping="Wrap"

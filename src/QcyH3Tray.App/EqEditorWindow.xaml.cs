@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
+using QcyH3Tray.App.Services;
 using QcyH3Tray.Core.App;
 using QcyH3Tray.Core.Rcsp;
 
@@ -64,6 +65,10 @@ public sealed partial class EqEditorWindow : Window
 
         Loaded += async (_, _) => await ReadFromHeadsetAsync().ConfigureAwait(true);
     }
+
+    /// <summary>窗口句柄就绪：挂 DWM 系统背景板（弹出类 → Transient/Acrylic，降级梯队见 BackdropService）。</summary>
+    private void OnSourceInitialized(object sender, EventArgs eventArgs)
+        => BackdropService.Apply(this, BackdropMode.Transient);
 
     /// <summary>生成七列：dB 数值 / Q 只读 / 竖向滑块 / 频率标签。</summary>
     private void BuildBandEditors()

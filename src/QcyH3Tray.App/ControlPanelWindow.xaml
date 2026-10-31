@@ -1,11 +1,11 @@
 ﻿<Window x:Class="QcyH3Tray.App.ControlPanelWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="QCY H3"
         Width="300"
         SizeToContent="Height"
         WindowStyle="None"
-        AllowsTransparency="True"
         Background="Transparent"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
@@ -16,23 +16,38 @@
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="ClearType"
         Deactivated="OnDeactivated"
+        SourceInitialized="OnSourceInitialized"
         PreviewKeyDown="OnPreviewKeyDown">
     <!--
-      托盘快捷面板（阶段 3a 重构，plan.md P1-1 #2）：
+      托盘快捷面板（阶段 3a 重构，plan.md P1-1 #2；2026-10-31 玻璃拟态改造）：
       头部状态 → 降级横幅（唯一场景）→ 3D 耳机展示位（资源缺失自动折叠）→ 电量
       （validity 映射）→ 噪声控制（四段 + 等级/场景子行）→ 均衡器 chips（等宽两行）
       → 游戏模式 → 页脚（控制中心 / 设置）。
-      机制保持不变：无边框 + 透明 + Topmost + 不进任务栏 + Deactivated 收起复用；
+      机制保持不变：无边框 + Topmost + 不进任务栏 + Deactivated 收起复用；
       窗口级 UseLayoutRounding / SnapsToDevicePixels / Ideal + ClearType（D2 根治之三）。
+      玻璃拟态：AllowsTransparency（分层窗口）与 DWM SystemBackdrop 不兼容，改用
+      WindowChrome（GlassFrameThickness=-1 全窗扩展帧）+ Background=Transparent，
+      透明区域透出系统 Acrylic（BackdropService，Transient 档）；Root 外沿 8px 透明
+      边距即原阴影区，玻璃卡片半透明填充 + Glass.Border 发丝描边 + 极轻阴影。
+      WindowChrome CaptionHeight=0 / ResizeBorderThickness=0：无标题拖拽、保持
+      NoResize 语义，内容区照常接收鼠标（命中测试不变）。
     -->
+    <shell:WindowChrome.WindowChrome>
+        <WindowChrome GlassFrameThickness="-1"
+                      CaptionHeight="0"
+                      ResizeBorderThickness="0"
+                      UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
     <Border x:Name="RootCard"
             Margin="8"
-            Background="{StaticResource Brush/Surface.Card}"
+            Background="{StaticResource Brush/Glass.Card}"
+            BorderBrush="{StaticResource Brush/Glass.Border}"
+            BorderThickness="1"
             CornerRadius="{StaticResource CornerRadius/Card}"
             Padding="{StaticResource Spacing/Card.Padding}"
             TextElement.FontFamily="{StaticResource Font/Primary}">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.38"/>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.18"/>
         </Border.Effect>
         <Border.RenderTransform>
             <TranslateTransform x:Name="RootShift"/>

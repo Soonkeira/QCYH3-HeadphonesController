@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using QcyH3Tray.Core.App;
 using QcyH3Tray.Core.Rcsp;
+using QcyH3Tray.App.Services;
 
 namespace QcyH3Tray.App;
 
@@ -123,6 +124,10 @@ public sealed partial class ControlPanelWindow : Window
     }
 
     // ───────────────────────── 定位与动画 ─────────────────────────
+
+    /// <summary>窗口句柄就绪：挂 DWM 系统背景板（弹出类 → Transient/Acrylic，降级梯队见 BackdropService）。</summary>
+    private void OnSourceInitialized(object sender, EventArgs eventArgs)
+        => BackdropService.Apply(this, BackdropMode.Transient);
 
     /// <summary>
     /// 贴系统托盘上方：Left=WorkArea.Right-宽-12，Top=WorkArea.Bottom-高-8。

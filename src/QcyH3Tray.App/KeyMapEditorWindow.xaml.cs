@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using QcyH3Tray.App.Services;
 using QcyH3Tray.Core.App;
 using QcyH3Tray.Core.Rcsp;
 
@@ -49,6 +50,10 @@ public sealed partial class KeyMapEditorWindow : Window
 
         Loaded += async (_, _) => await ReadFromHeadsetAsync().ConfigureAwait(true);
     }
+
+    /// <summary>窗口句柄就绪：挂 DWM 系统背景板（弹出类 → Transient/Acrylic，降级梯队见 BackdropService）。</summary>
+    private void OnSourceInitialized(object sender, EventArgs eventArgs)
+        => BackdropService.Apply(this, BackdropMode.Transient);
 
     // ───────────────────────── 读 / 保存 ─────────────────────────
 

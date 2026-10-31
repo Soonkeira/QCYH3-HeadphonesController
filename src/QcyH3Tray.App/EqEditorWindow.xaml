@@ -7,11 +7,12 @@
         MinWidth="640"
         MinHeight="520"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource Brush/Surface}"
+        Background="Transparent"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="ClearType">
+        TextOptions.TextRenderingMode="ClearType"
+        SourceInitialized="OnSourceInitialized">
     <!--
       EQ 编辑器（阶段 3b 重构，替换 EqDetailWindow，plan.md P1-2 #1）：
       顶部 7 段曲线画布（Polyline 折线 + 0dB 虚线基线对比）→ 总增益滑块 → 七段竖滑块
@@ -20,11 +21,14 @@
       铁律：只有 7 段原生通道（EqV1BandMap），不做十段视觉伪装；写走
       Manager.SetEqV1Async（Core 已带回读确认 + 乐观快照）。
       未保存修改（dirty）关闭时三选提示：应用并关闭 / 放弃 / 取消。
+      玻璃拟态（2026-10-31）：弹出类窗口 Acrylic（BackdropService，Transient 档）——
+      窗口背景透明、卡片玻璃化；表单区（滑块/输入框/小字号数值密集）用 Strong 版
+      玻璃保证对比度。
     -->
     <Window.Resources>
         <Style x:Key="Card" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource Brush/Surface.Card}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+            <Setter Property="Background" Value="{StaticResource Brush/Glass.Card.Strong}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
             <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>

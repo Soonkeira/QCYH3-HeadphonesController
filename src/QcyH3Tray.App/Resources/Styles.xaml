@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
 
     <!--
       ══════════════════════════════════════════════════════════════════
@@ -23,6 +24,24 @@
         <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
     </Style>
+
+    <!--
+      ═══════════════ 悬浮手感（hover lift）共享资源 ═══════════════
+      约定（性能纪律）：
+      - Effect/Lift 只在 Hover/Checked 期间由 Trigger 挂载（Setter Effect），进出即
+        挂载/卸载，不得常驻在按钮模板上（免全局位图效果开销）；Disabled 一律卸载；
+      - 各模板声明 x:Name="Lift" 的 TranslateTransform：Hover 进出以 150ms 动画在
+        Y=-1 / Y=0 间过渡，Pressed 回落 Y=0——"浮起-按下"手感；
+      - 适用：chips / 分段单段 / IconButton / AccentButton / SecondaryButton。
+        开关与滑块不加 lift（已有位移动画）；分段单段只做位移不加阴影——其宿主
+        分段轨道 ClipToBounds 会把阴影裁出硬边。
+    -->
+    <DropShadowEffect x:Key="Effect/Lift"
+                      po:Freeze="True"
+                      BlurRadius="8"
+                      ShadowDepth="2"
+                      Direction="270"
+                      Opacity="0.14"/>
 
     <!-- ═══════════════ 小节标签（电量 / 噪声控制 / 均衡器） ═══════════════ -->
     <Style x:Key="SectionLabel" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -50,6 +69,9 @@
                             Background="{TemplateBinding Background}"
                             CornerRadius="{StaticResource CornerRadius/Small}"
                             Padding="{TemplateBinding Padding}">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="Lift" Y="0"/>
+                        </Border.RenderTransform>
                         <ContentPresenter x:Name="Content"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -60,14 +82,66 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Ghost.Background.Hover}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Ghost.Foreground.Hover}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Ghost.Background.Pressed}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Ghost.Foreground.Hover}"/>
+                            <!-- 按下回落：阴影收敛 + 归位（悬停态仍在则松开后再浮起） -->
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Background" Value="Transparent"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Ghost.Foreground.Disabled}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
                             <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -106,6 +180,9 @@
                             Background="{TemplateBinding Background}"
                             CornerRadius="{StaticResource CornerRadius/Control}"
                             Padding="{TemplateBinding Padding}">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="Lift" Y="0"/>
+                        </Border.RenderTransform>
                         <ContentPresenter x:Name="Content"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -114,13 +191,64 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Accent.Hover}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Accent.Pressed}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Disabled}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Text.Disabled}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
                             <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -146,6 +274,9 @@
                             BorderThickness="1"
                             CornerRadius="{StaticResource CornerRadius/Control}"
                             Padding="{TemplateBinding Padding}">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="Lift" Y="0"/>
+                        </Border.RenderTransform>
                         <ContentPresenter x:Name="Content"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -154,14 +285,65 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Hover}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Pressed}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Subtle}"/>
                             <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Text.Disabled}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
                             <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -197,6 +379,8 @@
       段本身透明；选中滑块（Brush/Segment.Thumb 主色）由窗口代码在容器层绘制并动画。
       状态覆盖：Normal 次级字 / Hover 主字 / Pressed 主字 / Checked 白字（深底保证）/
       Disabled 禁用字 + 箭头光标。
+      悬浮手感：单段仅做 Y=-1 位移（不挂阴影——宿主分段轨道 ClipToBounds 会把
+      光晕裁出硬边）；Disabled 无 lift。
     -->
     <Style x:Key="SegmentRadioButton" TargetType="{x:Type RadioButton}">
         <Setter Property="Foreground" Value="{StaticResource Brush/Segment.Foreground}"/>
@@ -209,6 +393,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Border Background="Transparent">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="Lift" Y="0"/>
+                        </Border.RenderTransform>
                         <ContentPresenter x:Name="Content"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -221,9 +408,57 @@
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Segment.Foreground.Hover}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Segment.Foreground.Hover}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <!-- Checked 最后声明：覆盖 Hover/Pressed（选中白字不随悬停变暗） -->
                         <Trigger Property="IsChecked" Value="True">
@@ -236,16 +471,18 @@
     </Style>
 
     <!--
-      ═══════════════ 圆角 chip（EQ 预设） ═══════════════
+      ═══════════════ 圆角 chip（EQ 预设；CornerRadius/Chip=8 圆角方框） ═══════════════
       选中 = Accent 实底白字（透明度过渡动画）。D2 根治：无负 margin、
       MinHeight ≥ 30、垂直 Padding ≥ 6、MinWidth 保证三字中文不换行。
       状态覆盖：Normal / Hover / Pressed / Checked / Disabled。
       结构规则（根治"选中蓝底只盖住文字区"缺陷）：
-      - Root 不挂 Padding——装饰层必须与 Root 等大，才能铺满整颗胶囊；
+      - Root 不挂 Padding——装饰层必须与 Root 等大，才能铺满整颗方框；
       - Padding 移交内容层（ContentPresenter Margin），布局度量与此前完全一致；
       - Normal/Hover/Pressed/Disabled 仍切换 Root.Background（元素自身的背景
         本来就覆盖 Padding 环，无此问题）；Checked 走全尺寸 Overlay 淡入，
-        Opacity=1 时整颗胶囊为 Accent 实底，悬停背景被完全盖住（Checked 优先）。
+        Opacity=1 时整颗方框为 Accent 实底，悬停背景被完全盖住（Checked 优先）。
+      悬浮手感：Hover 浮起（Y=-1，150ms）+ Effect/Lift 阴影；Pressed 回落并收敛
+        阴影；Checked 期间阴影保持（Trigger 声明在最后故优先）；Disabled 无 lift。
     -->
     <Style x:Key="PresetChip" TargetType="{x:Type RadioButton}">
         <Setter Property="Background" Value="{StaticResource Brush/Chip.Background}"/>
@@ -266,6 +503,9 @@
                     <Border x:Name="Root"
                             Background="{TemplateBinding Background}"
                             CornerRadius="{StaticResource CornerRadius/Chip}">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="Lift" Y="0"/>
+                        </Border.RenderTransform>
                         <Grid>
                             <Border x:Name="Overlay"
                                     Background="{StaticResource Brush/Chip.Background.Checked}"
@@ -282,14 +522,65 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Hover}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Pressed}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
+                                                         To="-1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Disabled}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Disabled}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
                             <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
@@ -312,6 +603,7 @@
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Checked}"/>
+                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

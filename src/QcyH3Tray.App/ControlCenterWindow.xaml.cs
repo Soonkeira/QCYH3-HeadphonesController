@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using QcyH3Tray.App.Services;
 using QcyH3Tray.Core.App;
 using QcyH3Tray.Core.Ble;
 using QcyH3Tray.Core.Rcsp;
@@ -814,6 +815,8 @@ public sealed partial class ControlCenterWindow : Window
     /// <summary>位置越界保护（换显示器/改分辨率后不可找回窗口）：标题栏不在工作区内则居中。</summary>
     private void OnSourceInitialized(object sender, EventArgs eventArgs)
     {
+        BackdropService.Apply(this, BackdropMode.Main);   // 主窗口 Mica（玻璃拟态，降级梯队见 BackdropService）
+
         var workArea = SystemParameters.WorkArea;
         bool visible = Left >= workArea.Left - 40
             && Top >= workArea.Top - 10

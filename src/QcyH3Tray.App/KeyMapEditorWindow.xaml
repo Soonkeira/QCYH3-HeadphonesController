@@ -7,22 +7,25 @@
         MinWidth="660"
         MinHeight="520"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource Brush/Surface}"
+        Background="Transparent"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="ClearType">
+        TextOptions.TextRenderingMode="ClearType"
+        SourceInitialized="OnSourceInitialized">
     <!--
       按键自定义编辑器（阶段 4b）：按 keyNum 分组的卡片（每组 单击/双击/三击/四击/长按 5 行，
       ComboBox 选功能）→ 出厂槽折叠区（action≥0x81 只读展示）→ 读自耳机 / 保存到耳机。
       数据源 = DeviceData.KeyMap 原始整表（GetKeyMappingsAsync）；保存 = 编辑差异 → 整表
       SetKeyMappingsAsync（Core 写后回读确认 + 乐观快照）。铁律：整表或全不写，出厂槽绝不改写
       （守卫在 KeyMapEditorSupport）。未保存修改（dirty）关窗三选：保存并关闭 / 放弃 / 取消。
+      玻璃拟态（2026-10-31）：弹出类窗口 Acrylic（BackdropService，Transient 档）——窗口背景
+      透明、卡片玻璃化；行密（每卡 5 行 ComboBox + 小字说明）用 Strong 版玻璃保证对比度。
     -->
     <Window.Resources>
         <Style x:Key="Card" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource Brush/Surface.Card}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+            <Setter Property="Background" Value="{StaticResource Brush/Glass.Card.Strong}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
             <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>
