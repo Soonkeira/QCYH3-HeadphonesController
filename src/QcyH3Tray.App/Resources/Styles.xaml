@@ -496,114 +496,49 @@
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Focusable" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
+                <!-- The entire rounded surface is the checked background. No inner overlay
+                     that could be constrained to the text's desired size. -->
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Border x:Name="Root"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="{StaticResource CornerRadius/Chip}">
-                        <Border.RenderTransform>
-                            <TranslateTransform x:Name="Lift" Y="0"/>
-                        </Border.RenderTransform>
-                        <Grid>
-                            <Border x:Name="Overlay"
-                                    Background="{StaticResource Brush/Chip.Background.Checked}"
-                                    CornerRadius="{StaticResource CornerRadius/Chip}"
-                                    Opacity="0"/>
-                            <ContentPresenter x:Name="Content"
-                                              Margin="{TemplateBinding Padding}"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
-                        </Grid>
+                            BorderBrush="{StaticResource Brush/Border.Subtle}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerRadius/Chip}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter x:Name="Content"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True"
+                                          TextElement.FontFamily="{TemplateBinding FontFamily}"
+                                          TextElement.FontSize="{TemplateBinding FontSize}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Hover}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
-                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
-                                                         To="-1" Duration="0:0:0.15">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
-                                                         To="0" Duration="0:0:0.15">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Pressed}"/>
-                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
-                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
-                                                         To="0" Duration="0:0:0.15">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Lift" Storyboard.TargetProperty="Y"
-                                                         To="-1" Duration="0:0:0.15">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Disabled}"/>
-                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Disabled}"/>
-                            <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
-                            <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Overlay"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="1" Duration="0:0:0.15"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Overlay"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="0" Duration="0:0:0.15"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Checked}"/>
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Chip.Background.Checked}"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Checked}"/>
-                            <Setter TargetName="Root" Property="Effect" Value="{StaticResource Effect/Lift}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Accent}"/>
+                        </Trigger>
+                        <!-- Disabled must take precedence over Checked: no actionable-looking chips. -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Disabled}"/>
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Border.Subtle}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Disabled}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
