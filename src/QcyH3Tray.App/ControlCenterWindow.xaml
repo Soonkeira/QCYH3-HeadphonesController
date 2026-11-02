@@ -34,11 +34,12 @@
 
         <!-- 内容卡片（玻璃化：半透明白 + 发丝描边，浮在 Mica 上） -->
         <Style x:Key="Card" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource Brush/Glass.Card}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Border}"/>
+            <Setter Property="Background" Value="{StaticResource Brush/Glass.FloatingSurface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Edge}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
             <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>
+            <Setter Property="Effect" Value="{StaticResource Effect/Glass.CardElevation}"/>
         </Style>
 
         <!-- 大号数值（电量 / 降噪模式） -->
@@ -84,44 +85,77 @@
             <Setter Property="FontFamily" Value="{StaticResource Font/Primary}"/>
             <Setter Property="FontSize" Value="{StaticResource Font/Size.Subtitle}"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Focusable" Value="True"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Margin" Value="0,4"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type RadioButton}">
-                        <Border x:Name="Root"
-                                Background="Transparent"
-                                CornerRadius="{StaticResource CornerRadius/Control}"
-                                Padding="10,9">
-                            <Grid>
-                                <Rectangle x:Name="Indicator"
-                                           Width="3"
-                                           Fill="{StaticResource Brush/Accent}"
-                                           HorizontalAlignment="Left"
-                                           Margin="-10,0,8,0"
-                                           Visibility="Collapsed"/>
+                        <Grid x:Name="Surface">
+                            <Grid.RenderTransform>
+                                <TranslateTransform x:Name="Lift"/>
+                            </Grid.RenderTransform>
+                            <Border x:Name="Shadow"
+                                    Background="#DFFFFFFF"
+                                    CornerRadius="{StaticResource CornerRadius/Control}"
+                                    Effect="{StaticResource Effect/Glass.ControlHover}"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+                            <Border x:Name="Root"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource CornerRadius/Control}"
+                                    Padding="14,12">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource Font/Icon}"
+                                    <TextBlock x:Name="Glyph"
+                                               FontFamily="{StaticResource Font/Icon}"
+                                               Foreground="{TemplateBinding Foreground}"
                                                Text="{TemplateBinding Tag}"
                                                FontSize="{StaticResource Font/Size.Subtitle}"
                                                VerticalAlignment="Center"
-                                               Margin="0,0,10,0"/>
+                                               Margin="0,0,12,0"/>
                                     <ContentPresenter x:Name="Content"
                                                       VerticalAlignment="Center"
                                                       TextElement.Foreground="{TemplateBinding Foreground}"/>
                                 </StackPanel>
-                            </Grid>
-                        </Border>
+                            </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Hover}"/>
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Glass.ControlHover}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Glass.Edge}"/>
+                                <Setter TargetName="Shadow" Property="Opacity" Value="1"/>
                                 <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Text.Primary}"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Lift"
+                                                             Storyboard.TargetProperty="Y"
+                                                             To="-2" Duration="0:0:0.17"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Lift"
+                                                             Storyboard.TargetProperty="Y"
+                                                             To="0" Duration="0:0:0.17"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Surface.Hover}"/>
-                                <Setter TargetName="Indicator" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Glass.NavSelected}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Glass.Edge}"/>
+                                <Setter TargetName="Shadow" Property="Opacity" Value="1"/>
                                 <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Accent}"/>
+                                <Setter TargetName="Glyph" Property="Foreground" Value="{StaticResource Brush/Accent}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Shadow" Property="Opacity" Value="0"/>
+                                <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Text.Disabled}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -130,6 +164,7 @@
         </Style>
     </Window.Resources>
 
+    <Border Background="{StaticResource Brush/Glass.CenterWash}">
     <Grid TextElement.FontFamily="{StaticResource Font/Primary}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="208"/>
@@ -137,8 +172,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- ═══════════════ 左侧导航（玻璃栏：半透明白 + 玻璃发丝右描边） ═══════════════ -->
-        <Border Background="{StaticResource Brush/Glass.Card}"
-                BorderBrush="{StaticResource Brush/Glass.Hairline}"
+        <Border Background="{StaticResource Brush/Glass.Sidebar}"
+                BorderBrush="{StaticResource Brush/Glass.Edge}"
                 BorderThickness="0,0,1,0">
             <StackPanel Margin="{StaticResource Spacing/Card.Padding}">
                 <TextBlock Text="QCY H3"
@@ -188,8 +223,8 @@
                         <Border x:Name="HeadphoneHero"
                                 Grid.Column="0"
                                 CornerRadius="{StaticResource CornerRadius/Card}"
-                                Background="{StaticResource Brush/Surface.Subtle}"
-                                BorderBrush="{StaticResource Brush/Border.Subtle}"
+                                Background="{StaticResource Brush/Glass.FloatingSurface}"
+                                BorderBrush="{StaticResource Brush/Glass.Edge}"
                                 BorderThickness="1"
                                 ClipToBounds="True"
                                 Height="{StaticResource Size/Hero.Height.ControlCenter}"
@@ -686,4 +721,5 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
+    </Border>
 </Window>
