@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="QCY H3"
-        Width="380"
+        Width="410"
         SizeToContent="Height"
         WindowStyle="None"
         Background="Transparent"
@@ -38,20 +38,24 @@
                       ResizeBorderThickness="0"
                       UseAeroCaptionButtons="False"/>
     </shell:WindowChrome.WindowChrome>
-    <Border x:Name="RootCard"
-            Margin="8"
-            Background="{StaticResource Brush/Glass.Card}"
-            BorderBrush="{StaticResource Brush/Glass.Border}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource CornerRadius/Card}"
-            Padding="{StaticResource Spacing/Card.Padding}"
-            TextElement.FontFamily="{StaticResource Font/Primary}">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.18"/>
-        </Border.Effect>
-        <Border.RenderTransform>
+    <!-- Shadow is drawn on a separate empty visual to retain sharp text. -->
+    <Grid>
+        <Grid.RenderTransform>
             <TranslateTransform x:Name="RootShift"/>
-        </Border.RenderTransform>
+        </Grid.RenderTransform>
+        <Border Margin="18"
+                CornerRadius="{StaticResource CornerRadius/Card}"
+                Background="#D9FFFFFF"
+                Effect="{StaticResource Effect/Glass.ShellElevation}"
+                IsHitTestVisible="False"/>
+        <Border x:Name="RootCard"
+                Margin="18"
+                Background="{StaticResource Brush/Glass.Shell}"
+                BorderBrush="{StaticResource Brush/Glass.Edge}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource CornerRadius/Card}"
+                Padding="18"
+                TextElement.FontFamily="{StaticResource Font/Primary}">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Focusable="False"
@@ -108,8 +112,11 @@
                     Height="{StaticResource Size/Hero.Height}"
                     Margin="{StaticResource Spacing/Block}"
                     CornerRadius="{StaticResource CornerRadius/Card}"
-                    Background="{StaticResource Brush/Surface.Subtle}"
+                    Background="{StaticResource Brush/Glass.FloatingSurface}"
+                    BorderBrush="{StaticResource Brush/Glass.Edge}"
+                    BorderThickness="1"
                     ClipToBounds="True"
+                    Effect="{StaticResource Effect/Glass.CardElevation}"
                     Visibility="Collapsed">
                 <Grid>
                     <Image x:Name="HeadphoneHeroImage"
@@ -127,7 +134,8 @@
             </Border>
 
             <!-- 4. 电量：标签 + validity 小字 + 大号百分比 -->
-            <Grid Margin="{StaticResource Spacing/Block}">
+            <Border Style="{StaticResource GlassFloatingCard}" Margin="{StaticResource Spacing/Block}">
+                <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -153,9 +161,11 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource Brush/Text.Primary}"/>
             </Grid>
+            </Border>
 
             <!-- 5. 噪声控制：四段分段（选中滑块动画在代码层）+ 等级/场景子行 -->
-            <StackPanel x:Name="NoiseSection" Margin="{StaticResource Spacing/Block}">
+            <Border Style="{StaticResource GlassFloatingCard}" Margin="{StaticResource Spacing/Block}">
+              <StackPanel x:Name="NoiseSection">
                 <StackPanel.Style>
                     <Style TargetType="{x:Type StackPanel}">
                         <Style.Triggers>
@@ -271,9 +281,11 @@
                     </Grid>
                 </StackPanel>
             </StackPanel>
+            </Border>
 
             <!-- 6. 均衡器：等宽 chips 两行（4+3）；自定义 = 打开 EQ 编辑窗（3b 重做窗口本身） -->
-            <StackPanel Margin="{StaticResource Spacing/Block}">
+            <Border Style="{StaticResource GlassFloatingCard}" Margin="{StaticResource Spacing/Block}">
+              <StackPanel>
                 <TextBlock Text="均衡器" Style="{StaticResource SectionLabel}"/>
                 <WrapPanel x:Name="EqChipsPanel" ItemWidth="{StaticResource Size/EqChip.Width}">
                     <WrapPanel.Style>
@@ -328,9 +340,11 @@
                                  Checked="OnEqCustomChecked"/>
                 </WrapPanel>
             </StackPanel>
+            </Border>
 
             <!-- 7. 游戏模式：行 + 开关（validity≠Available 禁用并降透明度） -->
-            <Grid x:Name="GameModeRow" Margin="{StaticResource Spacing/Block}">
+            <Border Style="{StaticResource GlassFloatingCard}" Margin="{StaticResource Spacing/Block}">
+              <Grid x:Name="GameModeRow">
                 <Grid.Style>
                     <Style TargetType="{x:Type Grid}">
                         <Style.Triggers>
@@ -350,9 +364,11 @@
                               Checked="OnGameModeChanged"
                               Unchecked="OnGameModeChanged"/>
             </Grid>
+            </Border>
 
             <!-- 8. 页脚：控制中心（3b 创建窗口，当前点击提示开发中）+ 设置齿轮（菜单保留） -->
-            <Grid Margin="{StaticResource Spacing/Block}">
+            <Border Style="{StaticResource GlassFloatingCard}" Margin="{StaticResource Spacing/Block}" Padding="10,8">
+              <Grid>
                 <Button x:Name="ControlCenterButton"
                         Style="{StaticResource IconButton}"
                         HorizontalAlignment="Left"
@@ -391,8 +407,10 @@
                     </StackPanel>
                 </Button>
             </Grid>
+            </Border>
 
           </StackPanel>
         </ScrollViewer>
-    </Border>
+        </Border>
+    </Grid>
 </Window>
