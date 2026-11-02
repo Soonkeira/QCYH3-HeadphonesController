@@ -199,12 +199,10 @@ dotnet run --project src/QcyH3Tray.Cli -- help
 
 ## 产品视觉说明
 
-本项目的全部视觉资产均为**代码矢量原创绘制**（无外部图片文件、无生成式图片、无第三方库），
-与 QCY 官方素材无任何关系；造型为通用头戴式耳机剪影的原创演绎。
+项目图标及矢量备用耳机插画为**代码绘制的原创资源**；另附独立生成的透明 3D 耳机概念图用于产品主视觉。该概念图不代表真实产品摄影或 QCY 官方授权素材。
 
 - **应用图标** `src/QcyH3Tray.App/Assets/app.ico`：由 `tools/IconGen` 矢量绘制生成 16–256 七帧
   PNG-ICO（Accent 蓝渐变 + 细白外圈，深/浅任务栏均可辨）；修改几何即源。
-- **产品主视觉** `src/QcyH3Tray.App/Resources/HeadphoneArt.xaml`：3/4 视角头戴式耳机矢量渲染图
-  （512 设计坐标），浅底版 `AppImage/HeadphoneHero` / 深底版 `.Dark` 两键共用同一批几何保证造型一致。
+- **产品主视觉**：快捷面板和控制中心优先使用 `Assets/headphones_3d.png`（原创生成的 3D 概念渲染图，从界面概念稿中提取、透明背景；并非 QCY 官方产品照片）。原有 `Resources/HeadphoneArt.xaml` 3/4 视角矢量渲染仍保留作为后续可切换资源；深底版 `.Dark` 不受影响。
 - **托盘图标** `src/QcyH3Tray.App/TrayIconRenderer.cs`：迷你耳机剪影 + 电量徽章胶囊，运行时矢量绘制、
   按状态缓存（`TrayIconRendererTests` 覆盖分级色与缓存键）。
