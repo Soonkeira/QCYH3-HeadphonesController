@@ -30,3 +30,23 @@
 ## 后续建议
 
 Windows 验收确认后再考虑更新应用图标与正式发布。若 3D 概念图与耳机实物外形差异过大，优先使用授权的实机渲染作为替换，不依靠猜测修改硬件造型。
+
+## 2026-11-02 追加：全应用悬浮玻璃（参考用户提供的悬浮导航截图）
+
+用户期望的重点并非改主色，而是 **半透明、真实背景模糊、边缘高光、面板层次和触控般的抬升反馈**。本次延伸同一开发分支覆盖：
+
+- **原生模糊**：`Services/BackdropService.cs` 对控制中心及弹出窗口均优先尝试 Windows Acrylic Accent Blur；失败回退到系统 Backdrop（主窗 Mica / 浮窗系统 Acrylic），再回退不透明浅灰。Windows 高对比度模式直接使用不透明兜底。保持 `QCYH3TRAY_BACKDROP=system|accent|opaque` 调试开关；由于 AccentBlur 为 Windows 未公开 API，各系统版本必须实测。
+- **玻璃材质层级**：`Resources/Tokens.xaml` 新增 Shell/Sidebar/FloatingSurface/Control/NavSelected/Edge 渐变画刷及四级海拔阴影 Token，统一圆角和弱边缘反光。模糊归原生背景板负责，WPF 半透明渐变只承担材质深度，**不是把 WPF BlurEffect 加到文字上**。
+- **托盘快捷面板**：宽 410 DIP，窗口外沿留 18 DIP 空间，独立阴影空层叠在磨砂主体之后，避免外壳阴影栅格化内容文字；电量、降噪、EQ、游戏模式、底部入口都各自有玻璃卡片。保留原代码的控件命名、控制回调、状态禁用和自动定位。
+- **控制中心**：半透明底层，渐变侧栏和独立悬浮选中导航；信息卡片使用一致的高光和阴影层。
+- **按钮体验**：`PresetChip` 正常态半透明、边缘发丝描边和轻阴影；悬停上移 2 DIP，按下回落；选中保持蓝底白字完整覆盖整颗胶囊；Shadow 为单独装饰视觉，文字不施加 BlurEffect。
+- **其他窗口**：设备选择窗、EQ 编辑器、按键编辑器统一引入玻璃面、悬浮边界和主次操作按钮，不再遗留旧式原生按钮。
+- **自动化**：新增 `.github/workflows/windows-ci.yml`，在 Windows 执行 restore/build/test，供 PR 自动检验。但这一自动化不能替代真实 Windows 视觉和耳机 BLE 验收。
+
+### 静态检查与待验证边界
+
+当前已对修改后 9 份 XAML 文件运行结构与资源引用静态检查：标签配对、StaticResource 命名及窗口控件唯一性未发现错误。但这**不等于 WPF 已编译或视觉已通过**，完整构建结果以 Windows CI 为准。
+
+必须在 Windows 10/11 上确认：白色和深色桌面壁纸前的实际磨砂强度、透明圆角、悬浮阴影、按钮悬停动画、文本抗锯齿质量（尤其 125% 与 150% DPI）、低配设备渲染性能、720p 屏幕滚动，以及 Windows 高对比度或透明效果关闭时的退化表现。真机控制仍需确认 ANC、EQ、游戏模式和连接状态不回归。
+
+若低端 Windows 图形驱动对未公开 Acrylic Accent Blur 出现卡顿，可在本机设置 `QCYH3TRAY_BACKDROP=system` 以强制改用系统背景板；如仍不适用，可用 `opaque` 启用不透明模式。
