@@ -206,7 +206,7 @@
     <sys:Double x:Key="Size/Switch.Thumb">14</sys:Double>
     <sys:Double x:Key="Size/Switch.Travel">16</sys:Double>
     <sys:Double x:Key="Size/Hero.Height">152</sys:Double>
-    <sys:Double x:Key="Size/Hero.Height.ControlCenter">190</sys:Double>
+    <sys:Double x:Key="Size/Hero.Height.ControlCenter">230</sys:Double>
     <sys:Double x:Key="Size/IconButton.MinSize">28</sys:Double>
     <sys:Double x:Key="Size/Button.MinHeight">32</sys:Double>
 
