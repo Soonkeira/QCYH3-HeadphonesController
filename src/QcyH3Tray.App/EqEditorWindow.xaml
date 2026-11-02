@@ -27,11 +27,12 @@
     -->
     <Window.Resources>
         <Style x:Key="Card" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource Brush/Glass.Card.Strong}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Border}"/>
+            <Setter Property="Background" Value="{StaticResource Brush/Glass.FloatingSurface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Edge}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
             <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>
+            <Setter Property="Effect" Value="{StaticResource Effect/Glass.CardElevation}"/>
         </Style>
 
         <Style x:Key="NoteText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -59,7 +60,8 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="18" TextElement.FontFamily="{StaticResource Font/Primary}">
+    <Border Background="{StaticResource Brush/Glass.CenterWash}">
+    <Grid Margin="22" TextElement.FontFamily="{StaticResource Font/Primary}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -205,4 +207,5 @@
             </StackPanel>
         </Border>
     </Grid>
+    </Border>
 </Window>
