@@ -12,7 +12,38 @@
         SourceInitialized="OnSourceInitialized"
         Closing="OnClosing">
     <!-- 玻璃拟态（2026-10-31）：圆角玻璃卡片浮在 Acrylic 上（列表 + 小字号文本，Strong 版保对比度） -->
-    <Grid Margin="18">
+    <Window.Resources>
+        <Style x:Key="GlassDeviceItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Padding" Value="10,9"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="Root"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerRadius/Control}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Glass.ControlHover}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Glass.Edge}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Glass.NavSelected}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -21,11 +52,13 @@
         </Grid.RowDefinitions>
 
         <Border Grid.RowSpan="4"
-                Background="{StaticResource Brush/Glass.Card.Strong}"
-                BorderBrush="{StaticResource Brush/Glass.Border}"
+                Background="{StaticResource Brush/Glass.FloatingSurface}"
+                BorderBrush="{StaticResource Brush/Glass.Edge}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource CornerRadius/Card}"
-                Padding="6"/>
+                Padding="6"
+                Margin="-12"
+                Effect="{StaticResource Effect/Glass.CardElevation}"/>
 
         <TextBlock Text="选择要控制的 QCY H3 耳机：扫描 6 秒后从列表中选择，然后点击「确定」。"
                    TextWrapping="Wrap"
@@ -36,6 +69,10 @@
                  Grid.Row="1"
                  Margin="0,12,0,0"
                  SelectionMode="Single"
+                 ItemContainerStyle="{StaticResource GlassDeviceItem}"
+                 Background="#55FFFFFF"
+                 BorderBrush="{StaticResource Brush/Glass.Edge}"
+                 BorderThickness="1"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  SelectionChanged="OnDeviceSelectionChanged"
                  MouseDoubleClick="OnDeviceDoubleClick">
@@ -83,10 +120,10 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,14,0,0">
-            <Button x:Name="ScanButton" Content="扫描" MinWidth="76" Click="OnScanClick"/>
-            <Button x:Name="ConfirmButton" Content="确定" MinWidth="76" Margin="8,0,0,0"
+            <Button x:Name="ScanButton" Style="{StaticResource SecondaryButton}" Content="扫描" MinWidth="76" Click="OnScanClick"/>
+            <Button x:Name="ConfirmButton" Style="{StaticResource AccentButton}" Content="确定" MinWidth="76" Margin="8,0,0,0"
                     IsEnabled="False" Click="OnConfirmClick" FontWeight="Bold"/>
-            <Button x:Name="CancelButton" Content="取消" MinWidth="76" Margin="8,0,0,0" Click="OnCancelClick"/>
+            <Button x:Name="CancelButton" Style="{StaticResource SecondaryButton}" Content="取消" MinWidth="76" Margin="8,0,0,0" Click="OnCancelClick"/>
         </StackPanel>
     </Grid>
 </Window>
