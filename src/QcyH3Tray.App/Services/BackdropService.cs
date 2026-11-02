@@ -8,7 +8,7 @@ namespace QcyH3Tray.App.Services;
 /// <summary>背景板请求模式：主窗口（Mica）或弹出类窗口（色调亚克力）。</summary>
 internal enum BackdropMode
 {
-    /// <summary>主窗口（控制中心）：DWMSBT_MAINWINDOW（Mica）语义正确，保持 SystemBackdrop 首选。</summary>
+    /// <summary>主窗口（控制中心）：优先可调色 Acrylic，失败时使用 DWMSBT_MAINWINDOW（Mica）兜底。</summary>
     Main,
 
     /// <summary>弹出类窗口（快捷面板 / EQ 编辑器 / 按键编辑器 / DevicePicker / 对话框）。</summary>
@@ -28,7 +28,7 @@ internal enum BackdropKind
     /// <summary>
     /// SetWindowCompositionAttribute ACCENT_ENABLE_ACRYLICBLURBEHIND（未公开 API）。
     /// 弹出类首选（2026-10-31 可见性调优）：GradientColor 色调与 α 完全可控，中性浅灰低透明
-    /// tint 在白底内容前仍可感知"磨砂灰"；主窗口降为回退。已知代价见 <see cref="BackdropService"/>。
+    /// tint 在白底内容前仍可感知"磨砂灰"；主窗口与弹出窗口优先。已知代价见 <see cref="BackdropService"/>。
     /// </summary>
     AccentBlur,
 
@@ -43,8 +43,7 @@ internal enum BackdropKind
 /// ACCENT 亚克力的 GradientColor 色调与 α 完全可控，中性浅灰低透明 tint 在白底网页等内容前
 /// 仍可感知磨砂；DWM SystemBackdrop（<c>DwmSetWindowAttribute(DWMWA_SYSTEMBACKDROP_TYPE)</c>，
 /// 浅色主题 DWMSBT_TRANSIENTWINDOW 是近白磨砂、色调不可定制）降为回退档。
-/// 控制中心（<see cref="BackdropMode.Main"/>）保持 Mica 语义：SystemBackdrop(DWMSBT_MAINWINDOW)
-/// 首选、AccentBlur 回退。两者最终失败均落到不透明底色。每窗口写一行信息日志。
+/// 控制中心（<see cref="BackdropMode.Main"/>）也优先真实 Acrylic 模糊，Mica 降为更稳定的回退。两者最终失败均落到不透明底色。每窗口写一行信息日志。
 /// </para>
 /// <para>
 /// 已知代价（照实记录）：ACCENT ACRYLICBLURBEHIND 属未公开 API，微软未文档化；Win10 时代
@@ -60,8 +59,7 @@ internal enum BackdropKind
 /// <para>
 /// 诊断开关：环境变量 <c>QCYH3TRAY_BACKDROP</c> = <c>system</c> / <c>accent</c> /
 /// <c>opaque</c>（大小写不敏感）可强制走某一档，用于真机降级对比；未设置或无法识别
-/// 时按自动梯队（弹出类 AccentBlur → SystemBackdrop → Opaque；主窗口 SystemBackdrop →
-/// AccentBlur → Opaque）。
+/// 时按自动梯队（两种窗口均 AccentBlur → SystemBackdrop → Opaque）。
 /// </para>
 /// </summary>
 internal static class BackdropService
@@ -69,6 +67,8 @@ internal static class BackdropService
     /// <summary>诊断覆盖用环境变量名。</summary>
     internal const string OverrideEnvironmentVariable = "QCYH3TRAY_BACKDROP";
 
+    private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+    private const int DWMWCP_ROUND = 2;
     private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
     private const int DWMSBT_MAINWINDOW = 2;      // Mica
     private const int DWMSBT_TRANSIENTWINDOW = 3; // Acrylic
@@ -142,14 +142,20 @@ internal static class BackdropService
 
         string label = window.Title;
         BackdropKind? forced = ResolveOverride(Environment.GetEnvironmentVariable(OverrideEnvironmentVariable));
+        RequestRoundedCorners(hwnd);
+        // Respect Windows high-contrast accessibility settings over decorative blur.
+        if (SystemParameters.HighContrast)
+        {
+            ApplyOpaque(window, label, forced, "Windows 高对比度模式");
+            return;
+        }
 
-        // 降级梯队（2026-10-31 可见性调优：弹出类反转，ACCENT 色调亚克力升为首选）：
-        //   Main（控制中心）：SystemBackdrop(Mica) → AccentBlur → Opaque（主窗口语义不变）
-        //   Transient（弹出类）：AccentBlur（tint α 可控、白底内容前可感知）
-        //                       → SystemBackdrop(DWM Acrylic，浅色主题近白) → Opaque
-        BackdropKind[] ladder = mode == BackdropMode.Main
-            ? [BackdropKind.SystemBackdrop, BackdropKind.AccentBlur, BackdropKind.Opaque]
-            : [BackdropKind.AccentBlur, BackdropKind.SystemBackdrop, BackdropKind.Opaque];
+        // 浮动玻璃风格（2026-11-02）：两种窗口均优先真实可调色 Acrylic；
+        // 若系统禁止该效果则回退到 DWM system backdrop，最后是不透明安全底色。
+        // Both surfaces prioritize *actual backdrop blur* (the desired floating-glass
+        // visual). Mica is kept as the documented, hardware-accelerated fallback.
+        BackdropKind[] ladder =
+            [BackdropKind.AccentBlur, BackdropKind.SystemBackdrop, BackdropKind.Opaque];
 
         foreach (BackdropKind kind in ladder)
         {
@@ -177,6 +183,22 @@ internal static class BackdropService
             ? "诊断覆盖强制 Opaque"
             : "SystemBackdrop 与 AccentBlur 均不可用";
         ApplyOpaque(window, label, forced, reason);
+    }
+
+    /// <summary>Ask the DWM for rounded outer window corners when supported (Windows 11).
+    /// This is best-effort: older Windows releases ignore the attribute.</summary>
+    private static void RequestRoundedCorners(IntPtr hwnd)
+    {
+        try
+        {
+            int preference = DWMWCP_ROUND;
+            _ = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE,
+                ref preference, sizeof(int));
+        }
+        catch (Exception)
+        {
+            // Decorative only; never block application startup.
+        }
     }
 
     /// <summary>解析诊断环境变量（未知值按自动梯队处理，返回 null）。</summary>
