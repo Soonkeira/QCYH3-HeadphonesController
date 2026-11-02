@@ -137,8 +137,11 @@ public sealed partial class ControlPanelWindow : Window
     private void PositionAtTray()
     {
         var workArea = SystemParameters.WorkArea;
+        // Keep the tray panel usable on 720p screens and with 150%/200% scaling.
+        // The content scrolls instead of being clipped above the working area.
+        RootCard.MaxHeight = Math.Max(240, workArea.Height - 24);
         double availableWidth = Width - RootCard.Margin.Left - RootCard.Margin.Right;
-        RootCard.Measure(new Size(availableWidth, double.PositiveInfinity));
+        RootCard.Measure(new Size(availableWidth, RootCard.MaxHeight));
         double height = RootCard.DesiredSize.Height + RootCard.Margin.Top + RootCard.Margin.Bottom;
 
         Left = workArea.Right - Width - 12;
