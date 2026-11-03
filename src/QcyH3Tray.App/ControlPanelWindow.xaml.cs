@@ -68,6 +68,8 @@ public sealed partial class ControlPanelWindow : Window
         // 3D 耳机展示位：资源存在则显示，不存在整块折叠（接入结构，阶段 5 放入真实渲染图）
         HeadphoneHeroController.Apply(HeadphoneHero, HeadphoneHeroImage, TryFindResource(HeadphoneHeroController.ResourceKey));
 
+        SizeChanged += (_, _) => RoundedWindowRegion.Apply(this, 26);
+
         _app.StateUpdated += OnAppStateChanged;
         _app.AutostartChanged += OnAutostartChanged;
         Closed += (_, _) =>
@@ -127,7 +129,10 @@ public sealed partial class ControlPanelWindow : Window
 
     /// <summary>窗口句柄就绪：挂 DWM 系统背景板（弹出类 → Transient/Acrylic，降级梯队见 BackdropService）。</summary>
     private void OnSourceInitialized(object sender, EventArgs eventArgs)
-        => BackdropService.Apply(this, BackdropMode.Transient);
+    {
+        BackdropService.Apply(this, BackdropMode.Transient);
+        RoundedWindowRegion.Apply(this, 26);
+    }
 
     /// <summary>
     /// 贴系统托盘上方：Left=WorkArea.Right-宽-12，Top=WorkArea.Bottom-高-8。
