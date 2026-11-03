@@ -8,8 +8,7 @@ namespace QcyH3Tray.Tests;
 /// 环境变量 QCYH3TRAY_BACKDROP 未设置 / 空 / auto / 无法识别 → null（自动降级梯队）；
 /// system|mica → SystemBackdrop；accent|acrylic → AccentBlur；opaque|off → Opaque。
 /// 大小写不敏感、容忍首尾空白（真机降级对比用，键值宽松一些减少排查成本）。
-/// 另锁定 ACCENT tint（2026-10-31 可见性调优）：中性浅灰低透明、禁纯白（浅色主题下纯白
-/// tint 与 DWM Acrylic 一样隐形），ARGB 语义入参、ABGR（COLORREF 习惯）打包。
+/// 另锁定 ACCENT tint：低透明度的纯白磨砂色，不引入蓝灰色调；ARGB 语义入参、ABGR（COLORREF 习惯）打包。
 /// </summary>
 public class BackdropServiceTests
 {
@@ -63,7 +62,7 @@ public class BackdropServiceTests
     [Fact]
     public void AccentTintGradientColor_IsPackedFromDesignedArgb()
     {
-        // tint 锁定为设计值：中性浅灰 #EEF1F6 @ α=0x59（≈35%），
+        // tint 为纯白 #FFFFFF @ α=0x38（≈22%），
         // 打包方向由 PackAccentGradientColor（COLORREF ABGR）统一约定。
         Assert.Equal(
             BackdropService.PackAccentGradientColor(
@@ -75,15 +74,13 @@ public class BackdropServiceTests
     }
 
     [Fact]
-    public void AccentTintGradientColor_IsLowAlphaTintedGray_NotPureWhite()
+    public void AccentTintGradientColor_IsLowAlphaPureWhite()
     {
         uint packed = BackdropService.AccentTintGradientColor;
-
-        // α 压在约 25%–43%：磨砂可感知、又不糊死文字
         byte alpha = (byte)(packed >> 24);
-        Assert.InRange(alpha, 0x40, 0x6E);
 
-        // 禁纯白 tint（浅色主题下纯白 tint 落在白底内容前不可见，2026-10-31 真机实锤）
-        Assert.NotEqual(0xFFFFFFu, packed & 0xFFFFFF);
+        // Frosted white: low-alpha tint preserves the native blurred background.
+        Assert.InRange(alpha, 0x28, 0x50);
+        Assert.Equal(0xFFFFFFu, packed & 0xFFFFFF);
     }
 }
