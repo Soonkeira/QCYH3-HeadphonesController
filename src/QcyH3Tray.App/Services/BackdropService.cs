@@ -79,14 +79,13 @@ internal static class BackdropService
     // 经验值：避免窗口边缘出现黑边伪影（社区 WPF Acrylic 兜底实现通用取值）
     private const int ACCENT_FLAG_EDGE_FIX = 0x2;
 
-    // ─── ACCENT 亚克力 tint（2026-10-31 可见性调优）────────────────────────
-    // 中性浅灰低透明：ARGB #59EEF1F6（α=0x59 ≈ 35%）。纯白 tint 在浅色主题下与
-    // DWM Acrylic 一样"隐形"，必须带一点灰让磨砂在白底内容前可感知；透明度压低
-    // 到约 1/3 让背景模糊纹理透出，同时保持文字可读。按实机截图迭代定值。
-    internal const byte AccentTintAlpha = 0x59;
-    internal const byte AccentTintR = 0xEE;
-    internal const byte AccentTintG = 0xF1;
-    internal const byte AccentTintB = 0xF6;
+    // Flat frosted white: native Acrylic blurs the wallpaper; a low-opacity
+    // pure white tint allows the blurred background to remain visible.
+    // The WPF foreground shell provides independent text contrast.
+    internal const byte AccentTintAlpha = 0x38;
+    internal const byte AccentTintR = 0xFF;
+    internal const byte AccentTintG = 0xFF;
+    internal const byte AccentTintB = 0xFF;
 
     /// <summary>打包后的 ACCENT tint（字节序见 <see cref="PackAccentGradientColor"/>），测试锁定用。</summary>
     internal static readonly uint AccentTintGradientColor =
@@ -292,8 +291,7 @@ internal static class BackdropService
             EnsureTransparentComposition(hwnd);
 
             // GradientColor 字节序见 PackAccentGradientColor（COLORREF ABGR 习惯）。
-            // tint 用中性浅灰低透明（#59EEF1F6）：这是弹出类首选 ACCENT 而非 SystemBackdrop
-            // 的根本原因——α 可控，磨砂在白底内容前可见。已知代价（输入延迟传闻）见类注释。
+            // Use a low-alpha pure white tint, never a blue/gray or gradient tint.
             var policy = new AccentPolicy
             {
                 AccentState = ACCENT_ENABLE_ACRYLICBLURBEHIND,

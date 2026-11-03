@@ -81,49 +81,24 @@
     <SolidColorBrush x:Key="Brush/Surface.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
     <SolidColorBrush x:Key="Brush/Border.Subtle" Color="{StaticResource Color/Border.Subtle}"/>
 
-    <!-- Floating glass material system: an outer translucent shell, elevated inset
-         surfaces, subtle edge highlights and restrained shadows. The Windows
-         backdrop supplies genuine blur; WPF gradients supply the glass depth. -->
-    <LinearGradientBrush x:Key="Brush/Glass.Card" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#E4FFFFFF" Offset="0"/>
-        <GradientStop Color="#BCFFFFFF" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Brush/Glass.Shell" StartPoint="0,0" EndPoint="0.25,1">
-        <GradientStop Color="#D8FFFFFF" Offset="0"/>
-        <GradientStop Color="#B2F5F8FC" Offset="0.58"/>
-        <GradientStop Color="#A9F5F8FC" Offset="1"/>
-    </LinearGradientBrush>
-    <SolidColorBrush x:Key="Brush/Glass.CenterWash" Color="#4DFFFFFF"/>
-    <LinearGradientBrush x:Key="Brush/Glass.Sidebar" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#DFFAFDFF" Offset="0"/>
-        <GradientStop Color="#A4EDF3FC" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Brush/Glass.FloatingSurface" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#F7FFFFFF" Offset="0"/>
-        <GradientStop Color="#D6F5F8FE" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Brush/Glass.Control" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#F7FFFFFF" Offset="0"/>
-        <GradientStop Color="#CAE7ECF5" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Brush/Glass.ControlHover" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#FFFFFFFF" Offset="0"/>
-        <GradientStop Color="#E8F1F6FD" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Brush/Glass.NavSelected" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#F7FFFFFF" Offset="0"/>
-        <GradientStop Color="#D0E7EFFF" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Brush/Glass.Edge" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#F9FFFFFF" Offset="0"/>
-        <GradientStop Color="#9FB1BED3" Offset="1"/>
-    </LinearGradientBrush>
-    <SolidColorBrush x:Key="Brush/Glass.ControlEdge" Color="#C8FFFFFF"/>
-    <DropShadowEffect x:Key="Effect/Glass.ShellElevation" Color="#1B2739" BlurRadius="32" ShadowDepth="10" Opacity="0.27" Direction="270"/>
-    <DropShadowEffect x:Key="Effect/Glass.CardElevation" Color="#253650" BlurRadius="20" ShadowDepth="5" Opacity="0.18" Direction="270"/>
-    <DropShadowEffect x:Key="Effect/Glass.ControlRest" Color="#24344B" BlurRadius="7" ShadowDepth="2" Opacity="0.12" Direction="270"/>
-    <DropShadowEffect x:Key="Effect/Glass.ControlHover" Color="#23354D" BlurRadius="15" ShadowDepth="5" Opacity="0.25" Direction="270"/>
-    <DropShadowEffect x:Key="Effect/Glass.ControlSelected" Color="#194A9A" BlurRadius="12" ShadowDepth="3" Opacity="0.3" Direction="270"/>
+    <!-- Flat translucent WHITE material, no gradients. True blur comes from
+         Windows Acrylic at the HWND level (BackdropService), NOT these brushes. -->
+    <SolidColorBrush x:Key="Brush/Glass.Card" Color="{StaticResource Color/Glass.Card}"/>
+    <SolidColorBrush x:Key="Brush/Glass.Shell" Color="#99FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.CenterWash" Color="#24FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.Sidebar" Color="#80FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.FloatingSurface" Color="#52FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.Control" Color="#B8FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.ControlHover" Color="#E0FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.NavSelected" Color="#D9FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.Edge" Color="#C4FFFFFF"/>
+    <SolidColorBrush x:Key="Brush/Glass.ControlEdge" Color="#B8FFFFFF"/>
+    <DropShadowEffect x:Key="Effect/Glass.ShellElevation" Color="#303846" BlurRadius="22" ShadowDepth="4" Opacity="0.16" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.CardElevation" Color="#303846" BlurRadius="8" ShadowDepth="1" Opacity="0.06" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.ControlRest" Color="#303846" BlurRadius="4" ShadowDepth="1" Opacity="0.06" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.ControlHover" Color="#303846" BlurRadius="9" ShadowDepth="2" Opacity="0.14" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.ControlSelected" Color="#174895" BlurRadius="7" ShadowDepth="1" Opacity="0.14" Direction="270"/>
+
     <SolidColorBrush x:Key="Brush/Glass.Card.Strong" Color="{StaticResource Color/Glass.Card.Strong}"/>
     <SolidColorBrush x:Key="Brush/Glass.Border" Color="{StaticResource Color/Glass.Border}"/>
     <SolidColorBrush x:Key="Brush/Glass.Hairline" Color="{StaticResource Color/Glass.Hairline}"/>
@@ -228,10 +203,10 @@
     <Thickness x:Key="Spacing/Button.Padding">14,7</Thickness>
 
     <!-- ═══════════════ 圆角 ═══════════════ -->
-    <CornerRadius x:Key="CornerRadius/Card">24</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Card">26</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Control">16</CornerRadius>
     <!-- chip：圆角方框（与 Control 同族的 8），EQ 预设与降噪档位/场景统一；选中整框变蓝逻辑不变 -->
-    <CornerRadius x:Key="CornerRadius/Chip">17</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Chip">8</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Small">6</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Switch">10</CornerRadius>
 

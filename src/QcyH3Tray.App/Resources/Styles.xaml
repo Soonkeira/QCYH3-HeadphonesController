@@ -517,7 +517,8 @@
                             <TranslateTransform x:Name="Lift"/>
                         </Grid.RenderTransform>
                         <Border x:Name="Shadow"
-                                Background="#D9FFFFFF"
+                                Background="#B8FFFFFF"
+                                Opacity="0"
                                 CornerRadius="{StaticResource CornerRadius/Chip}"
                                 Effect="{StaticResource Effect/Glass.ControlRest}"
                                 IsHitTestVisible="False"/>
@@ -540,6 +541,7 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Glass.ControlHover}"/>
                             <Setter TargetName="Shadow" Property="Effect" Value="{StaticResource Effect/Glass.ControlHover}"/>
+                            <Setter TargetName="Shadow" Property="Opacity" Value="1"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Hover}"/>
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
@@ -587,6 +589,7 @@
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Brush/Chip.Background.Checked}"/>
                             <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Brush/Chip.Background.Checked}"/>
                             <Setter TargetName="Shadow" Property="Effect" Value="{StaticResource Effect/Glass.ControlSelected}"/>
+                            <Setter TargetName="Shadow" Property="Opacity" Value="1"/>
                             <Setter TargetName="Content" Property="TextElement.Foreground" Value="{StaticResource Brush/Chip.Foreground.Checked}"/>
                         </Trigger>
                         <!-- Keyboard focus should be visible but never override the checked fill. -->

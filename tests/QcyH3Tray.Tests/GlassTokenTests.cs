@@ -43,14 +43,13 @@ public class GlassTokenTests
         var tokens = LoadTokens();
 
         var radius = Assert.IsType<CornerRadius>(tokens["CornerRadius/Chip"]);
-        // 2026-11-02 悬浮玻璃改造锁定值：17 = Size/Chip.MinHeight(34) 的一半，
-        // 即圆角几何的上限本身（WPF Border 不自动收敛超限圆角，> MinHeight/2 会出现
-        // 角部交叠的破损几何）。这里双保险：锁定精确值 17 + 不得超出 MinHeight/2，
-        // 回归到 999 一类"真胶囊"值时两条断言同时失败。
-        Assert.Equal(17, radius.TopLeft);
-        Assert.Equal(17, radius.TopRight);
-        Assert.Equal(17, radius.BottomLeft);
-        Assert.Equal(17, radius.BottomRight);
+        // 2026-11-03 修正锁定值：8（圆角方框，回归 11-02 之前的原契约；
+        // "restore chip corner contract"）。双保险：锁定精确值 8 + 不得超出
+        // MinHeight/2，回归到 999 一类"真胶囊"值时两条断言同时失败。
+        Assert.Equal(8, radius.TopLeft);
+        Assert.Equal(8, radius.TopRight);
+        Assert.Equal(8, radius.BottomLeft);
+        Assert.Equal(8, radius.BottomRight);
 
         var chipMinHeight = Assert.IsType<double>(tokens["Size/Chip.MinHeight"]);
         Assert.InRange(radius.TopLeft, 0, chipMinHeight / 2);
@@ -61,28 +60,16 @@ public class GlassTokenTests
     {
         var tokens = LoadTokens();
 
-        // 2026-11-02 升级：Glass.Card 从 SolidColorBrush(60% 白) 改为纵向白色渐变，
-        // 半透明渐变承担玻璃"材质深度"（顶部亮 #E4 89% → 底部暗 #BC 74%），RGB 保持
-        // 纯白。设计区间 = 两个 stop 的 alpha 均落在 [0x99(60%), 0xE4(89%)] 内：
-        // 下限守住"磨砂纹理必须透出"（2026-10-31 可见性调优的结论），上限防止回归
-        // 为 0xFF 不透明实心（磨砂不可感知）。当前锁定：stop0 #E4FFFFFF@0、
-        // stop1 #BCFFFFFF@1，来自 Tokens.xaml 实际值。
-        var card = Assert.IsType<LinearGradientBrush>(tokens["Brush/Glass.Card"]);
-        Assert.Equal(2, card.GradientStops.Count);
-        var top = card.GradientStops[0];
-        var bottom = card.GradientStops[1];
-        Assert.Equal(0.0, top.Offset, 5);
-        Assert.Equal(1.0, bottom.Offset, 5);
-        Assert.InRange(top.Color.A, 0x99, 0xE4);
-        Assert.InRange(bottom.Color.A, 0x99, 0xE4);
-        Assert.Equal(0xE4, top.Color.A);
-        Assert.Equal(0xBC, bottom.Color.A);
-        foreach (var stop in card.GradientStops)
-        {
-            Assert.Equal(0xFF, stop.Color.R);
-            Assert.Equal(0xFF, stop.Color.G);
-            Assert.Equal(0xFF, stop.Color.B);
-        }
+        // 2026-11-03 修正：Glass.Card 回到 SolidColorBrush 纯白低透明（平光磨砂，
+        // 取消 11-02 的渐变材质与蓝灰 tint）。锁定 0x99（60% 白）：下限守住
+        // "磨砂纹理必须透出"（2026-10-31 可见性调优的结论），上限防止回归为
+        // 0xFF 不透明实心（磨砂不可感知）。RGB 必须纯白——蓝灰染色由
+        // BackdropServiceTests 的 tint 契约另行锁定。
+        var card = Assert.IsType<SolidColorBrush>(tokens["Brush/Glass.Card"]);
+        Assert.Equal(0x99, card.Color.A);
+        Assert.Equal(0xFF, card.Color.R);
+        Assert.Equal(0xFF, card.Color.G);
+        Assert.Equal(0xFF, card.Color.B);
 
         var strong = Assert.IsType<SolidColorBrush>(tokens["Brush/Glass.Card.Strong"]);
         Assert.Equal(0xD9, strong.Color.A);
