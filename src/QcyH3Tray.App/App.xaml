@@ -15,6 +15,11 @@
                 <ResourceDictionary Source="Resources/Styles.xaml"/>
                 <ResourceDictionary Source="Resources/HeadphoneArt.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!-- Local 3D product render supersedes the generic vector hero.
+                 The original vector keys stay in HeadphoneArt.xaml as fallback. -->
+            <BitmapImage x:Key="AppImage/HeadphoneHero"
+                         UriSource="/QcyH3Tray.App;component/Assets/headphones_3d.png"
+                         CacheOption="OnLoad"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

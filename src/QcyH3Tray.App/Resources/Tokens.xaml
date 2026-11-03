@@ -81,7 +81,49 @@
     <SolidColorBrush x:Key="Brush/Surface.Pressed" Color="{StaticResource Color/Surface.Pressed}"/>
     <SolidColorBrush x:Key="Brush/Border.Subtle" Color="{StaticResource Color/Border.Subtle}"/>
 
-    <SolidColorBrush x:Key="Brush/Glass.Card" Color="{StaticResource Color/Glass.Card}"/>
+    <!-- Floating glass material system: an outer translucent shell, elevated inset
+         surfaces, subtle edge highlights and restrained shadows. The Windows
+         backdrop supplies genuine blur; WPF gradients supply the glass depth. -->
+    <LinearGradientBrush x:Key="Brush/Glass.Card" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#E4FFFFFF" Offset="0"/>
+        <GradientStop Color="#BCFFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush/Glass.Shell" StartPoint="0,0" EndPoint="0.25,1">
+        <GradientStop Color="#D8FFFFFF" Offset="0"/>
+        <GradientStop Color="#B2F5F8FC" Offset="0.58"/>
+        <GradientStop Color="#A9F5F8FC" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush/Glass.CenterWash" Color="#4DFFFFFF"/>
+    <LinearGradientBrush x:Key="Brush/Glass.Sidebar" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#DFFAFDFF" Offset="0"/>
+        <GradientStop Color="#A4EDF3FC" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush/Glass.FloatingSurface" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F7FFFFFF" Offset="0"/>
+        <GradientStop Color="#D6F5F8FE" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush/Glass.Control" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F7FFFFFF" Offset="0"/>
+        <GradientStop Color="#CAE7ECF5" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush/Glass.ControlHover" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+        <GradientStop Color="#E8F1F6FD" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush/Glass.NavSelected" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F7FFFFFF" Offset="0"/>
+        <GradientStop Color="#D0E7EFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush/Glass.Edge" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#F9FFFFFF" Offset="0"/>
+        <GradientStop Color="#9FB1BED3" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush/Glass.ControlEdge" Color="#C8FFFFFF"/>
+    <DropShadowEffect x:Key="Effect/Glass.ShellElevation" Color="#1B2739" BlurRadius="32" ShadowDepth="10" Opacity="0.27" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.CardElevation" Color="#253650" BlurRadius="20" ShadowDepth="5" Opacity="0.18" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.ControlRest" Color="#24344B" BlurRadius="7" ShadowDepth="2" Opacity="0.12" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.ControlHover" Color="#23354D" BlurRadius="15" ShadowDepth="5" Opacity="0.25" Direction="270"/>
+    <DropShadowEffect x:Key="Effect/Glass.ControlSelected" Color="#194A9A" BlurRadius="12" ShadowDepth="3" Opacity="0.3" Direction="270"/>
     <SolidColorBrush x:Key="Brush/Glass.Card.Strong" Color="{StaticResource Color/Glass.Card.Strong}"/>
     <SolidColorBrush x:Key="Brush/Glass.Border" Color="{StaticResource Color/Glass.Border}"/>
     <SolidColorBrush x:Key="Brush/Glass.Hairline" Color="{StaticResource Color/Glass.Hairline}"/>
@@ -147,7 +189,7 @@
     <FontFamily x:Key="Font/Icon">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
     <sys:Double x:Key="Font/Size.Caption">11</sys:Double>
-    <sys:Double x:Key="Font/Size.Body">12.5</sys:Double>
+    <sys:Double x:Key="Font/Size.Body">13</sys:Double>
     <sys:Double x:Key="Font/Size.Subtitle">14</sys:Double>
     <sys:Double x:Key="Font/Size.Title">18</sys:Double>
     <sys:Double x:Key="Font/Size.Display">22</sys:Double>
@@ -186,27 +228,27 @@
     <Thickness x:Key="Spacing/Button.Padding">14,7</Thickness>
 
     <!-- ═══════════════ 圆角 ═══════════════ -->
-    <CornerRadius x:Key="CornerRadius/Card">16</CornerRadius>
-    <CornerRadius x:Key="CornerRadius/Control">9</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Card">24</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Control">16</CornerRadius>
     <!-- chip：圆角方框（与 Control 同族的 8），EQ 预设与降噪档位/场景统一；选中整框变蓝逻辑不变 -->
-    <CornerRadius x:Key="CornerRadius/Chip">8</CornerRadius>
+    <CornerRadius x:Key="CornerRadius/Chip">17</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Small">6</CornerRadius>
     <CornerRadius x:Key="CornerRadius/Switch">10</CornerRadius>
 
     <!-- ═══════════════ 尺寸 ═══════════════ -->
-    <sys:Double x:Key="Size/Chip.MinHeight">30</sys:Double>
+    <sys:Double x:Key="Size/Chip.MinHeight">34</sys:Double>
     <sys:Double x:Key="Size/Chip.MinWidth">44</sys:Double>
-    <sys:Double x:Key="Size/Chip.Small.MinHeight">26</sys:Double>
+    <sys:Double x:Key="Size/Chip.Small.MinHeight">30</sys:Double>
     <sys:Double x:Key="Size/Chip.Small.MinWidth">28</sys:Double>
-    <sys:Double x:Key="Size/EqChip.Width">58</sys:Double>
-    <sys:Double x:Key="Size/Segment.TrackHeight">36</sys:Double>
+    <sys:Double x:Key="Size/EqChip.Width">76</sys:Double>
+    <sys:Double x:Key="Size/Segment.TrackHeight">44</sys:Double>
     <sys:Double x:Key="Size/Segment.MinHeight">30</sys:Double>
     <sys:Double x:Key="Size/Switch.Width">36</sys:Double>
     <sys:Double x:Key="Size/Switch.Height">20</sys:Double>
     <sys:Double x:Key="Size/Switch.Thumb">14</sys:Double>
     <sys:Double x:Key="Size/Switch.Travel">16</sys:Double>
-    <sys:Double x:Key="Size/Hero.Height">96</sys:Double>
-    <sys:Double x:Key="Size/Hero.Height.ControlCenter">128</sys:Double>
+    <sys:Double x:Key="Size/Hero.Height">152</sys:Double>
+    <sys:Double x:Key="Size/Hero.Height.ControlCenter">230</sys:Double>
     <sys:Double x:Key="Size/IconButton.MinSize">28</sys:Double>
     <sys:Double x:Key="Size/Button.MinHeight">32</sys:Double>
 

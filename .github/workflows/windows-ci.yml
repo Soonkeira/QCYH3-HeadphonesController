@@ -1,0 +1,27 @@
+name: Windows build and tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore QcyH3Tray.sln
+      - name: Build WPF and tests
+        run: dotnet build QcyH3Tray.sln -c Release --no-restore
+      - name: Run unit tests
+        run: dotnet test QcyH3Tray.sln -c Release --no-build --verbosity normal

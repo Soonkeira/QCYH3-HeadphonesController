@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="均衡器编辑器"
         Width="680"
-        Height="580"
+        Height="690"
         MinWidth="640"
-        MinHeight="520"
+        MinHeight="620"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         UseLayoutRounding="True"
@@ -27,11 +27,12 @@
     -->
     <Window.Resources>
         <Style x:Key="Card" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource Brush/Glass.Card.Strong}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Border}"/>
+            <Setter Property="Background" Value="{StaticResource Brush/Glass.FloatingSurface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush/Glass.Edge}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="{StaticResource CornerRadius/Card}"/>
             <Setter Property="Padding" Value="{StaticResource Spacing/Card.Padding}"/>
+            <Setter Property="Effect" Value="{StaticResource Effect/Glass.CardElevation}"/>
         </Style>
 
         <Style x:Key="NoteText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -59,11 +60,14 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="18" TextElement.FontFamily="{StaticResource Font/Primary}">
+    <Border Background="{StaticResource Brush/Glass.CenterWash}">
+    <Grid Margin="22" TextElement.FontFamily="{StaticResource Font/Primary}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <!-- 七段竖滑块行：MinHeight 防塌缩（Auto 行总高≈窗口高时 * 行会被压到 0，
+                 2026-11-02 真机实测 4DIP 滑块不可用；窗口高 580→690 配套放行） -->
+            <RowDefinition Height="*" MinHeight="110"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -205,4 +209,5 @@
             </StackPanel>
         </Border>
     </Grid>
+    </Border>
 </Window>

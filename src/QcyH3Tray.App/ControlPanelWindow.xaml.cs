@@ -11,7 +11,7 @@ using QcyH3Tray.App.Services;
 namespace QcyH3Tray.App;
 
 /// <summary>
-/// 托盘快捷面板（阶段 3a 重构）：宽 300、高度自适应，贴系统托盘上方；
+/// 托盘快捷面板：宽 380、高度自适应，贴系统托盘上方；
 /// Deactivated 自动隐藏（复用不 Close）。结构：头部状态 → 降级横幅（唯一场景）→
 /// 3D 耳机展示位（资源缺失自动折叠）→ 电量（validity 映射）→ 噪声控制（四段 +
 /// 等级/场景子行）→ 均衡器预设 chips（等宽两行）→ 游戏模式 → 页脚（控制中心/设置）。
@@ -137,8 +137,11 @@ public sealed partial class ControlPanelWindow : Window
     private void PositionAtTray()
     {
         var workArea = SystemParameters.WorkArea;
+        // Keep the tray panel usable on 720p screens and with 150%/200% scaling.
+        // The content scrolls instead of being clipped above the working area.
+        RootCard.MaxHeight = Math.Max(240, workArea.Height - 24);
         double availableWidth = Width - RootCard.Margin.Left - RootCard.Margin.Right;
-        RootCard.Measure(new Size(availableWidth, double.PositiveInfinity));
+        RootCard.Measure(new Size(availableWidth, RootCard.MaxHeight));
         double height = RootCard.DesiredSize.Height + RootCard.Margin.Top + RootCard.Margin.Bottom;
 
         Left = workArea.Right - Width - 12;

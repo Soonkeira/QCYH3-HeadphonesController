@@ -6,12 +6,14 @@ using Xunit;
 namespace QcyH3Tray.Tests;
 
 /// <summary>
-/// 玻璃拟态视觉 Token 契约（2026-10-31 改造；同日可见性调优）：
-/// - CornerRadius/Chip = 8（圆角方框，与 CornerRadius/Control=9 同族；交付 1 锁定值，
-///   防止回归到 999 胶囊）；
-/// - 玻璃画刷齐全且透明度符合设计（Glass.Card 60% 白——可见性调优：72% 叠系统背景板
-///   整体近全白、磨砂不可感知 / Glass.Card.Strong 85% 白 / Glass.Border 40% 白 /
-///   Glass.Fallback = #F2F3F6 不透明降级底色）。
+/// 玻璃拟态视觉 Token 契约（2026-10-31 改造 → 2026-11-02 悬浮玻璃升级）：
+/// - CornerRadius/Chip = 17（2026-11-02 改值：MinHeight 34 的一半，即胶囊几何上限本身；
+///   锁定 17 且不得超出 MinHeight/2——回归到 999 一类"真胶囊"值时两条断言同时失败）；
+/// - 玻璃画刷齐全且透明度符合设计。Glass.Card 已从 60% 纯色升级为纵向渐变：
+///   顶部 #E4FFFFFF（89% 白）→ 底部 #BCFFFFFF（74% 白），均为纯白 RGB——半透明
+///   渐变负责"材质深度"，真实模糊由 BackdropService 的系统背景板负责；
+/// - 纯色玻璃画刷保持原契约（Glass.Card.Strong 85% 白 / Glass.Border 40% 白 /
+///   Glass.Hairline 10% 黑 / Glass.Fallback = #F2F3F6 不透明降级底色）。
 /// 注：测试宿主没有 Application 资源作用域，按文件路径直接解析 Tokens.xaml
 /// （与运行时同一份文件，而非拷贝），模式与 HeadphoneArtResourceTests 一致。
 /// </summary>
@@ -41,10 +43,17 @@ public class GlassTokenTests
         var tokens = LoadTokens();
 
         var radius = Assert.IsType<CornerRadius>(tokens["CornerRadius/Chip"]);
-        Assert.Equal(8, radius.TopLeft);
-        Assert.Equal(8, radius.TopRight);
-        Assert.Equal(8, radius.BottomLeft);
-        Assert.Equal(8, radius.BottomRight);
+        // 2026-11-02 悬浮玻璃改造锁定值：17 = Size/Chip.MinHeight(34) 的一半，
+        // 即圆角几何的上限本身（WPF Border 不自动收敛超限圆角，> MinHeight/2 会出现
+        // 角部交叠的破损几何）。这里双保险：锁定精确值 17 + 不得超出 MinHeight/2，
+        // 回归到 999 一类"真胶囊"值时两条断言同时失败。
+        Assert.Equal(17, radius.TopLeft);
+        Assert.Equal(17, radius.TopRight);
+        Assert.Equal(17, radius.BottomLeft);
+        Assert.Equal(17, radius.BottomRight);
+
+        var chipMinHeight = Assert.IsType<double>(tokens["Size/Chip.MinHeight"]);
+        Assert.InRange(radius.TopLeft, 0, chipMinHeight / 2);
     }
 
     [Fact]
@@ -52,11 +61,28 @@ public class GlassTokenTests
     {
         var tokens = LoadTokens();
 
-        var card = Assert.IsType<SolidColorBrush>(tokens["Brush/Glass.Card"]);
-        Assert.Equal(0x99, card.Color.A);
-        Assert.Equal(0xFF, card.Color.R);
-        Assert.Equal(0xFF, card.Color.G);
-        Assert.Equal(0xFF, card.Color.B);
+        // 2026-11-02 升级：Glass.Card 从 SolidColorBrush(60% 白) 改为纵向白色渐变，
+        // 半透明渐变承担玻璃"材质深度"（顶部亮 #E4 89% → 底部暗 #BC 74%），RGB 保持
+        // 纯白。设计区间 = 两个 stop 的 alpha 均落在 [0x99(60%), 0xE4(89%)] 内：
+        // 下限守住"磨砂纹理必须透出"（2026-10-31 可见性调优的结论），上限防止回归
+        // 为 0xFF 不透明实心（磨砂不可感知）。当前锁定：stop0 #E4FFFFFF@0、
+        // stop1 #BCFFFFFF@1，来自 Tokens.xaml 实际值。
+        var card = Assert.IsType<LinearGradientBrush>(tokens["Brush/Glass.Card"]);
+        Assert.Equal(2, card.GradientStops.Count);
+        var top = card.GradientStops[0];
+        var bottom = card.GradientStops[1];
+        Assert.Equal(0.0, top.Offset, 5);
+        Assert.Equal(1.0, bottom.Offset, 5);
+        Assert.InRange(top.Color.A, 0x99, 0xE4);
+        Assert.InRange(bottom.Color.A, 0x99, 0xE4);
+        Assert.Equal(0xE4, top.Color.A);
+        Assert.Equal(0xBC, bottom.Color.A);
+        foreach (var stop in card.GradientStops)
+        {
+            Assert.Equal(0xFF, stop.Color.R);
+            Assert.Equal(0xFF, stop.Color.G);
+            Assert.Equal(0xFF, stop.Color.B);
+        }
 
         var strong = Assert.IsType<SolidColorBrush>(tokens["Brush/Glass.Card.Strong"]);
         Assert.Equal(0xD9, strong.Color.A);
